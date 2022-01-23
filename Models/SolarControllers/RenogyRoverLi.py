@@ -97,7 +97,7 @@ class RenogyRoverLi(AbstractModel):
             'type': 'string',
         },
         'serial_number': {
-            'bytes': 2,
+            'bytes': 4,
             'address': 0x18,
             'type': 'string',
         },
@@ -129,10 +129,12 @@ class RenogyRoverLi(AbstractModel):
     }
 
     def __init__ (self, debug=False, port='/dev/ttyUSB0'):
-        print('Modelo RenogyRoverLi instanciado')
         self.DEBUG = debug
         self.serial = SerialConnection(port=port, debug=debug, baudrate=9600,
                                        method='rtu', timeout=0.5)
+
+        if (debug):
+            print('Modelo RenogyRoverLi instanciado')
 
     def get_system_voltage_current (self):
         """
@@ -195,6 +197,8 @@ class RenogyRoverLi(AbstractModel):
     def get_hardware (self):
         """
         Devuelve la información para la versión del hardware
+        0x0016 y 0x0017 Hardware version 4 bytes
+
         :return:
         """
         if self.DEBUG:
@@ -217,6 +221,7 @@ class RenogyRoverLi(AbstractModel):
     def get_version (self):
         """
         Devuelve la información sobre la versión del software
+        0x0014 y 0x0015 Software version 4 bytes
         """
         if self.DEBUG:
             print('Leyendo versión')
@@ -238,6 +243,7 @@ class RenogyRoverLi(AbstractModel):
     def get_serial_number (self):
         """
         Devuelve el número de serie del controlador
+        0x0018 y 0x0019 Serial number 4 bytes
         """
         if self.DEBUG:
             print('Leyendo número de serie')
@@ -252,6 +258,8 @@ class RenogyRoverLi(AbstractModel):
     def get_battery_percentage (self):
         """
         Devuelve el porcentaje de la batería
+        0x0100 Battery capacity SOC 2 bytes
+        Current battery capacity value 0-100 (%)
         :return:
         """
         if self.DEBUG:
@@ -267,6 +275,8 @@ class RenogyRoverLi(AbstractModel):
     def get_battery_voltage (self):
         """
         Devuelve el voltaje de la batería
+        0x0101 Battery voltage 2 bytes
+        Battery voltage * 0.1 (V)
         """
         if self.DEBUG:
             print('Leyendo voltaje de batería')
@@ -281,6 +291,8 @@ class RenogyRoverLi(AbstractModel):
     def get_battery_temperature (self):
         """
         Devuelve la temperatura de la batería en su exterior (sensor externo)
+        0x0103 Battery temperature 2 bytes
+        Actual temperature value (b7: sign bit; b0-b6: temperature value) (ºC)
         """
         scheme = self.sectionMap['battery_temperature']
 
@@ -307,6 +319,8 @@ class RenogyRoverLi(AbstractModel):
     def get_controller_temperature(self):
         """
         Devuelve la temperatura del controlador de carga
+        0x0103 Controller temperature 2 bytes
+        Actual temperature value (b7: sign bit; b0-b6: temperature value) (ºC)
         """
         scheme = self.sectionMap['controller_temperature']
 
@@ -325,6 +339,7 @@ class RenogyRoverLi(AbstractModel):
     def get_load_voltage(self):
         """
         Devuelve el voltaje de la carga actual
+        0x0104 Load voltage 2 bytes
         Street light voltage * 0.1 (V)
         """
         scheme = self.sectionMap['controller_temperature']
