@@ -131,6 +131,9 @@ class RenogyRoverLi(AbstractModel):
         scheme = self.sectionMap['hardware']
 
         while True:
+            if self.DEBUG:
+                print('Leyendo voltaje actual de sistema')
+
             try:
                 response = self.serial.read_register(scheme['address'],
                                                      scheme['bytes'],
@@ -141,6 +144,7 @@ class RenogyRoverLi(AbstractModel):
                 return voltage
             except Exception as e:
                 if self.debug():
+                    print('Error al leer voltaje actual de sistema')
                     print(e)
 
                 sleep(5)
@@ -155,6 +159,8 @@ class RenogyRoverLi(AbstractModel):
 
         while True:
             try:
+                if self.DEBUG:
+                    print('Leyendo intensidad actual de sistema')
                 response = self.serial.read_register(scheme['address'],
                                                      scheme['bytes'],
                                                      scheme['type'])
@@ -164,6 +170,7 @@ class RenogyRoverLi(AbstractModel):
                 return amps
             except Exception as e:
                 if self.debug():
+                    print('Error al leer intensidad actual de sistema')
                     print(e)
 
                 sleep(5)
@@ -175,6 +182,9 @@ class RenogyRoverLi(AbstractModel):
         Devuelve la información para la versión del hardware
         :return:
         """
+        if self.DEBUG:
+            print('Leyendo hardware')
+
         scheme = self.sectionMap['hardware']
 
         response = self.serial.read_register(scheme['address'], scheme['bytes'],
@@ -193,6 +203,9 @@ class RenogyRoverLi(AbstractModel):
         """
         Devuelve la información sobre la versión del software
         """
+        if self.DEBUG:
+            print('Leyendo versión')
+
         scheme = self.sectionMap['version']
 
         response = self.serial.read_register(scheme['address'], scheme['bytes'],
@@ -211,6 +224,9 @@ class RenogyRoverLi(AbstractModel):
         """
         Devuelve el número de serie del controlador
         """
+        if self.DEBUG:
+            print('Leyendo número de serie')
+
         scheme = self.sectionMap['serial_number']
 
         response = self.serial.read_register(scheme['address'], scheme['bytes'],
@@ -223,6 +239,9 @@ class RenogyRoverLi(AbstractModel):
         Devuelve el porcentaje de la batería
         :return:
         """
+        if self.DEBUG:
+            print('Leyendo porcentaje de batería')
+
         scheme = self.sectionMap['battery_percentage']
 
         return self.serial.read_register(scheme['address'], scheme['bytes'],
@@ -232,6 +251,9 @@ class RenogyRoverLi(AbstractModel):
         """
         Devuelve el voltaje de la batería
         """
+        if self.DEBUG:
+            print('Leyendo voltaje de batería')
+
         scheme = self.sectionMap['battery_voltage']
 
         return self.serial.read_register(scheme['address'], scheme['bytes'],
@@ -245,6 +267,8 @@ class RenogyRoverLi(AbstractModel):
 
         while True:
             try:
+                if self.DEBUG:
+                    print('Leyendo temperatura de batería')
 
                 register = self.serial.read_register(scheme['address'],
                                                      scheme['bytes'],
@@ -256,6 +280,7 @@ class RenogyRoverLi(AbstractModel):
                 return battery_temp
             except Exception as e:
                 print(e)
+                print('Error al leer temperatura de batería')
                 sleep(5)
 
         return None
