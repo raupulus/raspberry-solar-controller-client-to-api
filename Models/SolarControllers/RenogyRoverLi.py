@@ -171,6 +171,16 @@ class RenogyRoverLi(AbstractModel):
             'address': 0x010E,
             'type': 'float',
         },
+        'today_max_charging_power': {
+            'bytes': 2,
+            'address': 0x010D,
+            'type': 'int',
+        },
+        'today_max_discharging_power': {
+            'bytes': 2,
+            'address': 0x010E,
+            'type': 'int',
+        },
     }
 
     def __init__ (self, debug=False, port='/dev/ttyUSB0'):
@@ -543,6 +553,38 @@ class RenogyRoverLi(AbstractModel):
 
         return float(response[0]) / 100 if response else None
 
+    def get_today_max_charging_power (self):
+        """
+        Devuelve la potencia máxima de carga en el día actual
+        0x010F Battery's max. charging power of the current day
+        Battery's max. charging power of the current day (W)
+        """
+        scheme = self.sectionMap['today_max_charging_power']
+
+        if self.DEBUG:
+            print('Leyendo potencia máxima de carga en el día para la batería')
+
+        response = self.serial.read_register(scheme['address'], scheme['bytes'],
+                                             scheme['type'])
+
+        return response[0] if response else None
+
+    def get_today_max_discharging_power (self):
+        """
+        Devuelve la potencia máxima de descarga en el día actual
+        0x0110 Battery's max. discharging power of the current day
+        Battery's max. discharging power of the current day (W)
+        """
+        scheme = self.sectionMap['today_max_discharging_power']
+
+        if self.DEBUG:
+            print('Leyendo potencia máxima de descarga en el día para la batería')
+
+        response = self.serial.read_register(scheme['address'], scheme['bytes'],
+                                             scheme['type'])
+
+        return response[0] if response else None
+
     def get_today_historical_info_datas (self):
         """
         Devuelve una lista con los datos históricos para el día actual
@@ -553,6 +595,8 @@ class RenogyRoverLi(AbstractModel):
             'today_battery_min_voltage': self.get_today_battery_min_voltage(),
             'today_max_charging_current': self.get_today_max_charging_current(),
             'today_max_discharging_current': self.get_today_max_discharging_current(),
+            'today_max_charging_power': self.get_today_max_charging_power(),
+            'today_max_discharging_power': self.get_today_max_discharging_power()
         }
 
     def get_historical_info_datas (self):
@@ -604,10 +648,6 @@ class RenogyRoverLi(AbstractModel):
             'solar_voltage': self.get_solar_voltage(),
             'solar_current': self.get_solar_current(),
             'solar_power': self.get_solar_power(),
-            'today_battery_max_voltage': self.get_today_battery_max_voltage(),
-            'today_battery_min_voltage': self.get_today_battery_min_voltage(),
-            'today_max_charging_current': self.get_today_max_charging_current(),
-            'today_max_discharging_current': self.get_today_max_discharging_current(),
         }
 
     def tablemodel (self):
