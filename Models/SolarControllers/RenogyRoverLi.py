@@ -292,15 +292,18 @@ class RenogyRoverLi(AbstractModel):
         :return:
         """
         # TODO → Devolver modelo, versión, número de serie, etc.
-        pass
+        datas = {
+            'hardware': self.get_hardware(),
+            'version': self.get_version(),
+            'serial_number': self.get_serial_number(),
+        }
+
+        return datas
 
     def get_all_datas (self):
         datas = {
             'system_voltage_current': self.get_system_voltage_current(),
             'system_intensity_current': self.get_system_intensity_current(),
-            'hardware': self.get_hardware(),
-            'version': self.get_version(),
-            'serial_number': self.get_serial_number(),
             'battery_voltage': self.get_battery_voltage(),
             'battery_temperature': self.get_battery_temperature(),
             'battery_percentage': self.get_battery_percentage(),
