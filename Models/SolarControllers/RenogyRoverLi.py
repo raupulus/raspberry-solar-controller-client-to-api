@@ -161,6 +161,7 @@ class RenogyRoverLi(AbstractModel):
             try:
                 if self.DEBUG:
                     print('Leyendo intensidad actual de sistema')
+
                 response = self.serial.read_register(scheme['address'],
                                                      scheme['bytes'],
                                                      scheme['type'])

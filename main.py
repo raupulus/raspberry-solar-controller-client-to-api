@@ -154,6 +154,7 @@ def main ():
         loop()
     except Exception as e:
         print('Ha ocurrido un error en la aplicación:', e.__class__.__name__)
+        print(e)
         sleep(300)
         main()
     exit(0)
