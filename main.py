@@ -107,6 +107,7 @@ def loop ():
 
         # Leyendo controlador solar
         datas = solar_controller.get_all_datas()
+        datas = solar_controller.get_controller_info()
 
         if DEBUG:
             print('Datos obtenidos: ' + str(datas))

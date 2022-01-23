@@ -288,7 +288,7 @@ class RenogyRoverLi(AbstractModel):
                 response = self.serial.read_register(scheme['address'],
                                                      scheme['bytes'],
                                                      scheme['type'])
-                battery_temp_bits = response & 0x00ff
+                battery_temp_bits = response[1] & 0x00ff
                 temp_value = battery_temp_bits & 0x0ff
                 sign = battery_temp_bits >> 7
 
@@ -309,10 +309,10 @@ class RenogyRoverLi(AbstractModel):
         if self.DEBUG:
             print('Leyendo temperatura del controlador solar')
 
-        register = self.serial.read_register(scheme['address'],
+        response = self.serial.read_register(scheme['address'],
                                              scheme['bytes'],
                                              scheme['type'])
-        controller_temp_bits = register >> 8
+        controller_temp_bits = response[0] >> 8
         temp_value = controller_temp_bits & 0x0ff
         sign = controller_temp_bits >> 7
 
