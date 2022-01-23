@@ -191,6 +191,16 @@ class RenogyRoverLi(AbstractModel):
             'address': 0x0112,
             'type': 'int',
         },
+        'today_power_generation': {
+            'bytes': 2,
+            'address': 0x0113,
+            'type': 'int',
+        },
+        'today_power_consumition': {
+            'bytes': 2,
+            'address': 0x0114,
+            'type': 'int',
+        },
     }
 
     def __init__ (self, debug=False, port='/dev/ttyUSB0'):
@@ -599,8 +609,7 @@ class RenogyRoverLi(AbstractModel):
     def get_today_charging_amp_hours (self):
         """
         Devuelve la carga en Ah para el día actual
-        0x0111 Charging amp-hrs of the current day
-        Charging amp-hrs of the current day (Ah)
+        0x0111 Charging amp-hrs of the current day (Ah)
         """
         scheme = self.sectionMap['today_charging_amp_hours']
 
@@ -615,13 +624,42 @@ class RenogyRoverLi(AbstractModel):
     def get_today_discharging_amp_hours (self):
         """
         Devuelve la descarga en Ah para el día actual
-        0x0112 Discharging amp-hrs of the current day
-        Discharging amp-hrs of the current day (Ah)
+        0x0112 Discharging amp-hrs of the current day (Ah)
         """
         scheme = self.sectionMap['today_discharging_amp_hours']
 
         if self.DEBUG:
             print('Leyendo descarga máxima en Ah en el día')
+
+        response = self.serial.read_register(scheme['address'], scheme['bytes'],
+                                             scheme['type'])
+
+        return response[0] if response else None
+
+    def get_today_power_generation (self):
+        """
+        Devuelve la potencia de generada en el día actual
+        0x0113 Power generation of the current day (kilowatt hour / 10000)
+        """
+        scheme = self.sectionMap['today_power_generation']
+
+        if self.DEBUG:
+            print('Leyendo potencia de generación en el día')
+
+        response = self.serial.read_register(scheme['address'], scheme['bytes'],
+                                             scheme['type'])
+
+        return response[0] if response else None
+
+    def get_today_power_consumition(self):
+        """
+        Devuelve la potencia consumida en el día actual
+        0x0114 Power consumption of the current day (kilowatt hour / 10000)
+        """
+        scheme = self.sectionMap['today_power_consumition']
+
+        if self.DEBUG:
+            print('Leyendo potencia de consumición en el día')
 
         response = self.serial.read_register(scheme['address'], scheme['bytes'],
                                              scheme['type'])
@@ -641,6 +679,8 @@ class RenogyRoverLi(AbstractModel):
             'today_max_charging_power': self.get_today_max_charging_power(),
             'today_charging_amp_hours': self.get_today_charging_amp_hours(),
             'today_discharging_amp_hours': self.get_today_discharging_amp_hours(),
+            'today_power_generation': self.get_today_power_generation(),
+            'today_power_consumition': self.get_today_power_consumition()
         }
 
     def get_historical_info_datas (self):
