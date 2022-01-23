@@ -102,23 +102,28 @@ class RenogyRoverLi(AbstractModel):
             'type': 'string',
         },
         'battery_percentage': {
-            'bytes': 1,
+            'bytes': 2,
             'address': 0x100,
             'type': 'float',
         },
         'battery_voltage': {
-            'bytes': 1,
+            'bytes': 2,
             'address': 0x101,
             'type': 'float',
         },
         'battery_temperature': {
-            'bytes': 1,
+            'bytes': 2,
             'address': 0x103,
             'type': 'float',
         },
         'controller_temperature': {
-            'bytes': 1,
+            'bytes': 2,
             'address': 0x103,
+            'type': 'float',
+        },
+        'load_voltage': {
+            'bytes': 2,
+            'address': 0x104,
             'type': 'float',
         },
     }
@@ -250,8 +255,10 @@ class RenogyRoverLi(AbstractModel):
 
         scheme = self.sectionMap['battery_percentage']
 
-        return self.serial.read_register(scheme['address'], scheme['bytes'],
+        response = self.serial.read_register(scheme['address'], scheme['bytes'],
                                          scheme['type'])
+
+        return response[0] if response else None
 
     def get_battery_voltage (self):
         """
@@ -262,8 +269,10 @@ class RenogyRoverLi(AbstractModel):
 
         scheme = self.sectionMap['battery_voltage']
 
-        return self.serial.read_register(scheme['address'], scheme['bytes'],
-                                         scheme['type'])
+        response = self.serial.read_register(scheme['address'], scheme['bytes'],
+                                             scheme['type'])
+
+        return response[0] if response else None
 
     def get_battery_temperature (self):
         """
@@ -282,8 +291,8 @@ class RenogyRoverLi(AbstractModel):
                 battery_temp_bits = response & 0x00ff
                 temp_value = battery_temp_bits & 0x0ff
                 sign = battery_temp_bits >> 7
-                battery_temp = -(temp_value - 128) if sign == 1 else temp_value
-                return battery_temp
+
+                return -(temp_value - 128) if sign == 1 else temp_value
             except Exception as e:
                 print(e)
                 print('Error al leer temperatura de batería')
@@ -309,7 +318,22 @@ class RenogyRoverLi(AbstractModel):
 
         return -(temp_value - 128) if sign == 1 else temp_value
 
-    def controller_info (self):
+    def get_load_voltage(self):
+        """
+        Devuelve el voltaje de la carga actual
+        Street light voltage * 0.1 (V)
+        """
+        scheme = self.sectionMap['controller_temperature']
+
+        if self.DEBUG:
+            print('Leyendo temperatura del controlador solar')
+
+        response = self.serial.read_register(scheme['address'], scheme['bytes'],
+                                             scheme['type'])
+
+        return response[0] if response else None
+
+    def get_controller_info (self):
         """
         Devuelve información del controlador de carga solar.
         :return:
@@ -335,6 +359,7 @@ class RenogyRoverLi(AbstractModel):
             'battery_temperature': self.get_battery_temperature(),
             'battery_percentage': self.get_battery_percentage(),
             'controller_temperature': self.get_controller_temperature(),
+            'load_voltage': self.get_load_voltage(),
         }
 
         return datas
