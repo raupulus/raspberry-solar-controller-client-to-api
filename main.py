@@ -107,11 +107,15 @@ def loop ():
 
         # Leyendo controlador solar
         datas = solar_controller.get_all_datas()
-        info = solar_controller.get_controller_info()
+        info = solar_controller.get_all_controller_info_datas()
+        historical_today = solar_controller.get_today_historical_info_datas()
+        historical = solar_controller.get_historical_info_datas()
 
         if DEBUG:
             print('Datos obtenidos: ' + str(datas))
             print('Información del controlador: ' + str(info))
+            print('Histórico del día: ' + str(historical_today))
+            print('Histórico total: ' + str(historical))
 
         # Almacena en la base de datos.
         # save_to_db(dbconnection)

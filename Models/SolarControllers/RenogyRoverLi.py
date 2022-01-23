@@ -151,6 +151,26 @@ class RenogyRoverLi(AbstractModel):
             'address': 0x109,
             'type': 'float',
         },
+        'today_battery_min_voltage': {
+            'bytes': 2,
+            'address': 0x010B,
+            'type': 'float',
+        },
+        'today_battery_max_voltage': {
+            'bytes': 2,
+            'address': 0x010C,
+            'type': 'float',
+        },
+        'today_max_charging_current': {
+            'bytes': 2,
+            'address': 0x010D,
+            'type': 'float',
+        },
+        'today_max_discharging_current': {
+            'bytes': 2,
+            'address': 0x010E,
+            'type': 'float',
+        },
     }
 
     def __init__ (self, debug=False, port='/dev/ttyUSB0'):
@@ -293,7 +313,7 @@ class RenogyRoverLi(AbstractModel):
         scheme = self.sectionMap['battery_percentage']
 
         response = self.serial.read_register(scheme['address'], scheme['bytes'],
-                                         scheme['type'])
+                                             scheme['type'])
 
         return response[0] if response else None
 
@@ -341,7 +361,7 @@ class RenogyRoverLi(AbstractModel):
 
         return None
 
-    def get_controller_temperature(self):
+    def get_controller_temperature (self):
         """
         Devuelve la temperatura del controlador de carga
         0x0103 Controller temperature 2 bytes
@@ -361,7 +381,7 @@ class RenogyRoverLi(AbstractModel):
 
         return -(temp_value - 128) if sign == 1 else temp_value
 
-    def get_load_voltage(self):
+    def get_load_voltage (self):
         """
         Devuelve el voltaje de la carga actual
         0x0104 Load voltage 2 bytes
@@ -377,7 +397,7 @@ class RenogyRoverLi(AbstractModel):
 
         return float(response[0]) / 10 if response else None
 
-    def get_load_current(self):
+    def get_load_current (self):
         """
         Devuelve la intensidad de la carga actual
         0x0105 Load current 2 bytes
@@ -393,7 +413,7 @@ class RenogyRoverLi(AbstractModel):
 
         return float(response[0]) / 100 if response else None
 
-    def get_load_power(self):
+    def get_load_power (self):
         """
         Devuelve la intensidad de la carga actual
         0x0105 Load current 2 bytes
@@ -409,7 +429,7 @@ class RenogyRoverLi(AbstractModel):
 
         return response[0] if response else None
 
-    def get_solar_voltage(self):
+    def get_solar_voltage (self):
         """
         Devuelve la tensión del panel solar actualmente.
         0x0107 Solar panel voltage
@@ -425,7 +445,7 @@ class RenogyRoverLi(AbstractModel):
 
         return float(response[0]) / 10 if response else None
 
-    def get_solar_current(self):
+    def get_solar_current (self):
         """
         Devuelve la intensidad del panel solar actualmente.
         0x0108 Solar panel current (to controller)
@@ -441,7 +461,7 @@ class RenogyRoverLi(AbstractModel):
 
         return float(response[0]) / 100 if response else None
 
-    def get_solar_power(self):
+    def get_solar_power (self):
         """
         Devuelve la potencia del panel solar actualmente.
         0x0109 Solar charging power
@@ -457,7 +477,94 @@ class RenogyRoverLi(AbstractModel):
 
         return response[0] if response else None
 
-    def get_controller_info (self):
+    def get_today_battery_min_voltage (self):
+        """
+        Devuelve la tensión mínima de la batería en el día actual
+        0x010B Battery's min. voltage of the current day
+        Battery's min. voltage of the current day * 0.1 (V)
+        """
+        scheme = self.sectionMap['today_battery_min_voltage']
+
+        if self.DEBUG:
+            print('Leyendo voltaje mínimo en el día para la batería')
+
+        response = self.serial.read_register(scheme['address'], scheme['bytes'],
+                                             scheme['type'])
+
+        return float(response[0]) / 10 if response else None
+
+    def get_today_battery_max_voltage (self):
+        """
+        Devuelve la tensión máxima de la batería en el día actual
+        0x010C Battery's max. voltage of the current day
+        Battery's max. voltage of the current day * 0.1 (V)
+        """
+        scheme = self.sectionMap['today_battery_max_voltage']
+
+        if self.DEBUG:
+            print('Leyendo voltaje máximo en el día para la batería')
+
+        response = self.serial.read_register(scheme['address'], scheme['bytes'],
+                                             scheme['type'])
+
+        return float(response[0]) / 10 if response else None
+
+    def get_today_max_charging_current (self):
+        """
+        Devuelve la intensidad máxima de carga en el día actual
+        0x010D Battery's max. charging current of the current day
+        Battery's max. charging current of the current day * 0.01 (A)
+        """
+        scheme = self.sectionMap['today_max_charging_current']
+
+        if self.DEBUG:
+            print(
+                'Leyendo intensidad máxima de carga en el día para la batería')
+
+        response = self.serial.read_register(scheme['address'], scheme['bytes'],
+                                             scheme['type'])
+
+        return float(response[0]) / 100 if response else None
+
+    def get_today_max_discharging_current (self):
+        """
+        Devuelve la intensidad máxima de descarga en el día actual
+        0x010E Battery's max. discharging current of the current day
+        Battery's max. discharging current of the current day * 0.01 (A)
+        """
+        scheme = self.sectionMap['today_max_discharging_current']
+
+        if self.DEBUG:
+            print(
+                'Leyendo intensidad máxima de descarga en el día para la batería')
+
+        response = self.serial.read_register(scheme['address'], scheme['bytes'],
+                                             scheme['type'])
+
+        return float(response[0]) / 100 if response else None
+
+    def get_today_historical_info_datas (self):
+        """
+        Devuelve una lista con los datos históricos para el día actual
+        :return:
+        """
+        return {
+            'today_battery_max_voltage': self.get_today_battery_max_voltage(),
+            'today_battery_min_voltage': self.get_today_battery_min_voltage(),
+            'today_max_charging_current': self.get_today_max_charging_current(),
+            'today_max_discharging_current': self.get_today_max_discharging_current(),
+        }
+
+    def get_historical_info_datas (self):
+        """
+        Devuelve una lista con los datos históricos generales
+        :return:
+        """
+        return {
+
+        }
+
+    def get_all_controller_info_datas (self):
         """
         Devuelve información del controlador de carga solar.
         :return:
@@ -470,7 +577,7 @@ class RenogyRoverLi(AbstractModel):
             'system_intensity_current': self.get_system_intensity_current(),
         }
 
-    def get_all_solar_panel_info_datas(self):
+    def get_all_solar_panel_info_datas (self):
         """
         Devuelve toda la información de los paneles solares.
         :return:
@@ -494,9 +601,13 @@ class RenogyRoverLi(AbstractModel):
             'load_voltage': self.get_load_voltage(),
             'load_current': self.get_load_current(),
             'load_power': self.get_load_power(),
-            'solar_current': self.get_solar_current(),
             'solar_voltage': self.get_solar_voltage(),
+            'solar_current': self.get_solar_current(),
             'solar_power': self.get_solar_power(),
+            'today_battery_max_voltage': self.get_today_battery_max_voltage(),
+            'today_battery_min_voltage': self.get_today_battery_min_voltage(),
+            'today_max_charging_current': self.get_today_max_charging_current(),
+            'today_max_discharging_current': self.get_today_max_discharging_current(),
         }
 
     def tablemodel (self):
