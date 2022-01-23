@@ -77,12 +77,12 @@ class RenogyRoverLi(AbstractModel):
             'type': 'string',
         },
         'system_voltage_current': {
-            'bytes': 1,
+            'bytes': 2,
             'address': 0xa,
             'type': 'float',
         },
         'system_intensity_current': {
-            'bytes': 1,
+            'bytes': 2,
             'address': 0xa,
             'type': 'float',
         },
@@ -137,6 +137,8 @@ class RenogyRoverLi(AbstractModel):
     def get_system_voltage_current (self):
         """
         Devuelve el voltaje actual de consumo en el sistema
+        0x000A
+        [1] → 8 higher bits: max. voltage supported by the system (V)
         """
         scheme = self.sectionMap['system_voltage_current']
 
@@ -149,7 +151,7 @@ class RenogyRoverLi(AbstractModel):
                                                      scheme['bytes'],
                                                      scheme['type'])
 
-                voltage = response >> 8
+                voltage = response[0] >> 8
 
                 return voltage
             except Exception as e:
@@ -164,6 +166,8 @@ class RenogyRoverLi(AbstractModel):
     def get_system_intensity_current (self):
         """
         Devuelve el consumo en amperios actual de consumo en el sistema
+        0x000A
+        [1] → 8 lower bits: rated charging current (A)
         """
         scheme = self.sectionMap['system_intensity_current']
 
@@ -176,7 +180,7 @@ class RenogyRoverLi(AbstractModel):
                                                      scheme['bytes'],
                                                      scheme['type'])
 
-                amps = response & 0x00ff
+                amps = response[1] & 0x00ff
 
                 return amps
             except Exception as e:
@@ -326,7 +330,7 @@ class RenogyRoverLi(AbstractModel):
         scheme = self.sectionMap['controller_temperature']
 
         if self.DEBUG:
-            print('Leyendo temperatura del controlador solar')
+            print('Leyendo voltaje para la carga actual de consumo')
 
         response = self.serial.read_register(scheme['address'], scheme['bytes'],
                                              scheme['type'])
