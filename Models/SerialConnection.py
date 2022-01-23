@@ -95,10 +95,10 @@ class SerialConnection:
         if response.isError() and self.DEBUG:
             print("Error: " + str(response.function_code))
         elif self.DEBUG and response.registers:
-            msg = "Registro: {}, Valor: {}".format(register, response.registers[0])
+            msg = "Registro: {}, Valor: {}".format(register, response.registers)
             print(msg)
 
-        value = response.registers[0] if response.registers else None
+        value = response.registers if response.registers else None
 
         if self.DEBUG:
             print(type(value))
