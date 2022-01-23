@@ -309,7 +309,19 @@ class RenogyRoverLi(AbstractModel):
 
         return -(temp_value - 128) if sign == 1 else temp_value
 
-
+    def controller_info (self):
+        """
+        Devuelve información del controlador de carga solar.
+        :return:
+        """
+        # TODO → Devolver modelo, versión, número de serie, etc.
+        datas = {
+            'hardware': self.get_hardware(),
+            'version': self.get_version(),
+            'serial_number': self.get_serial_number(),
+            'system_voltage_current': self.get_system_voltage_current(),
+            'system_intensity_current': self.get_system_intensity_current(),
+        }
 
         return datas
 
