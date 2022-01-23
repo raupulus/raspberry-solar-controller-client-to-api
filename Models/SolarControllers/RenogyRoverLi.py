@@ -143,7 +143,7 @@ class RenogyRoverLi(AbstractModel):
 
                 return voltage
             except Exception as e:
-                if self.debug():
+                if self.DEBUG:
                     print('Error al leer voltaje actual de sistema')
                     print(e)
 
@@ -169,7 +169,7 @@ class RenogyRoverLi(AbstractModel):
 
                 return amps
             except Exception as e:
-                if self.debug():
+                if self.DEBUG:
                     print('Error al leer intensidad actual de sistema')
                     print(e)
 
