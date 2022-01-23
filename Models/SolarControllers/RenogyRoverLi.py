@@ -216,6 +216,26 @@ class RenogyRoverLi(AbstractModel):
             'address': 0x0117,
             'type': 'int',
         },
+        'historical_total_charging_amp_hours': {
+            'bytes': 4,
+            'address': 0x0118,
+            'type': 'int',
+        },
+        'historical_total_discharging_amp_hours': {
+            'bytes': 4,
+            'address': 0x011A,
+            'type': 'int',
+        },
+        'historical_cumulative_power_generation': {
+            'bytes': 4,
+            'address': 0x011C,
+            'type': 'int',
+        },
+        'historical_cumulative_power_consumption': {
+            'bytes': 4,
+            'address': 0x011E,
+            'type': 'int',
+        },
     }
 
     def __init__ (self, debug=False, port='/dev/ttyUSB0'):
@@ -666,7 +686,7 @@ class RenogyRoverLi(AbstractModel):
 
         return response[0] if response else None
 
-    def get_today_power_consumition(self):
+    def get_today_power_consumition (self):
         """
         Devuelve la potencia consumida en el día actual
         0x0114 Power consumption of the current day (kilowatt hour / 10000)
@@ -681,7 +701,7 @@ class RenogyRoverLi(AbstractModel):
 
         return response[0] if response else None
 
-    def get_historical_total_days_operating(self):
+    def get_historical_total_days_operating (self):
         """
         Devuelve el número de días que el controlador ha estado operativo.
         0x0115 Total number of operating days - 2 bytes
@@ -696,12 +716,13 @@ class RenogyRoverLi(AbstractModel):
 
         return response[0] if response else None
 
-    def get_historical_total_number_battery_over_discharges(self):
+    def get_historical_total_number_battery_over_discharges (self):
         """
         Devuelve el número de sobre descargas de la batería.
         0x0116 Total number of battery over-discharges - 2 bytes
         """
-        scheme = self.sectionMap['historical_total_number_battery_over_discharges']
+        scheme = self.sectionMap[
+            'historical_total_number_battery_over_discharges']
 
         if self.DEBUG:
             print('Leyendo número de descargas de la batería')
@@ -711,7 +732,7 @@ class RenogyRoverLi(AbstractModel):
 
         return response[0] if response else None
 
-    def get_historical_total_number_battery_full_charges(self):
+    def get_historical_total_number_battery_full_charges (self):
         """
         Devuelve el número de cargas completas de la batería.
         0x0117 Total number of battery full-charges - 2 bytes
@@ -720,6 +741,66 @@ class RenogyRoverLi(AbstractModel):
 
         if self.DEBUG:
             print('Leyendo número de cargas completas de la batería')
+
+        response = self.serial.read_register(scheme['address'], scheme['bytes'],
+                                             scheme['type'])
+
+        return response[0] if response else None
+
+    def get_historical_total_charging_amp_hours (self):
+        """
+        Devuelve la carga total en Ah que ha sido almacenado en la batería.
+        0x0118-0x0119 Total charging amp-hrs of the battery - 4 bytes (Ah)
+        """
+        scheme = self.sectionMap['historical_total_charging_amp_hours']
+
+        if self.DEBUG:
+            print('Leyendo carga total en Ah')
+
+        response = self.serial.read_register(scheme['address'], scheme['bytes'],
+                                             scheme['type'])
+
+        return response[0] if response else None
+
+    def get_historical_total_discharging_amp_hours (self):
+        """
+        Devuelve la descarga total en Ah que ha sido almacenado en la batería.
+        0x011A-0x011B Total discharging amp-hrs of the battery - 4 bytes (Ah)
+        """
+        scheme = self.sectionMap['historical_total_discharging_amp_hours']
+
+        if self.DEBUG:
+            print('Leyendo descarga total en Ah')
+
+        response = self.serial.read_register(scheme['address'], scheme['bytes'],
+                                             scheme['type'])
+
+        return response[0] if response else None
+
+    def get_historical_cumulative_power_generation (self):
+        """
+        Devuelve la potencia generada acumulada en el tiempo.
+        0x011C-0x011D Cumulative power generation - 4 bytes (kilowatt hour/ 10000)
+        """
+        scheme = self.sectionMap['historical_cumulative_power_generation']
+
+        if self.DEBUG:
+            print('Leyendo potencia generada en el día actual')
+
+        response = self.serial.read_register(scheme['address'], scheme['bytes'],
+                                             scheme['type'])
+
+        return response[0] if response else None
+
+    def get_historical_cumulative_power_consumption (self):
+        """
+        Devuelve la potencia consumida acumulada en el tiempo.
+        0x011E-0x011F Cumulative power consumption - 4 bytes (kilowatt hour/ 10000)
+        """
+        scheme = self.sectionMap['historical_cumulative_power_consumption']
+
+        if self.DEBUG:
+            print('Leyendo potencia consumida en el día actual')
 
         response = self.serial.read_register(scheme['address'], scheme['bytes'],
                                              scheme['type'])
@@ -741,9 +822,7 @@ class RenogyRoverLi(AbstractModel):
             'today_discharging_amp_hours': self.get_today_discharging_amp_hours(),
             'today_power_generation': self.get_today_power_generation(),
             'today_power_consumition': self.get_today_power_consumition(),
-            'historical_total_days_operating': self.get_historical_total_days_operating(),
-            'historical_total_number_battery_over_discharges': self.get_historical_total_number_battery_over_discharges(),
-            'historical_total_number_battery_full_charges': self.get_historical_total_number_battery_full_charges(),
+
         }
 
     def get_historical_info_datas (self):
@@ -752,7 +831,13 @@ class RenogyRoverLi(AbstractModel):
         :return:
         """
         return {
-
+            'historical_total_days_operating': self.get_historical_total_days_operating(),
+            'historical_total_number_battery_over_discharges': self.get_historical_total_number_battery_over_discharges(),
+            'historical_total_number_battery_full_charges': self.get_historical_total_number_battery_full_charges(),
+            'historical_total_charging_amp_hours': self.get_historical_total_charging_amp_hours(),
+            'historical_total_discharging_amp_hours': self.get_historical_total_discharging_amp_hours(),
+            'historical_cumulative_power_generation': self.get_historical_cumulative_power_generation(),
+            'historical_cumulative_power_consumption': self.get_historical_cumulative_power_consumption(),
         }
 
     def get_all_controller_info_datas (self):
