@@ -236,6 +236,31 @@ class RenogyRoverLi(AbstractModel):
             'address': 0x011E,
             'type': 'int',
         },
+        'street_light_status': {
+            'bytes': 2,
+            'address': 0x0120,
+            'type': 'int',
+        },
+        'street_light_brightness': {
+            'bytes': 2,
+            'address': 0x0120,
+            'type': 'int',
+        },
+        'charging_status': {
+            'bytes': 2,
+            'address': 0x0120,
+            'type': 'int',
+        },
+        'nominal_battery_capacity': {
+            'bytes': 2,
+            'address': 0xE002,
+            'type': 'int',
+        },
+        'battery_type': {
+            'bytes': 2,
+            'address': 0xE002,
+            'type': 'int',
+        },
     }
 
     def __init__ (self, debug=False, port='/dev/ttyUSB0'):
@@ -807,6 +832,94 @@ class RenogyRoverLi(AbstractModel):
 
         return response[0] if response else None
 
+    def get_street_light_status (self):
+        """
+        Devuelve el estado de la luz de calle.
+        0x0120 Street light status - 2 byte (bool)
+        """
+        scheme = self.sectionMap['street_light_status']
+
+        if self.DEBUG:
+            print('Leyendo estado de la luz en la calle')
+
+        response = self.serial.read_register(scheme['address'], scheme['bytes'],
+                                             scheme['type'])
+
+        return bool(response[0]) if response else None
+
+    def get_street_light_brightness (self):
+        """
+        Devuelve el brillo de la luz de calle.
+        0x0120 Street light brightness - 2 byte (0-6, 0-100%)
+        """
+        scheme = self.sectionMap['street_light_brightness']
+
+        if self.DEBUG:
+            print('Leyendo brillo de la luz en la calle')
+
+        response = self.serial.read_register(scheme['address'], scheme['bytes'],
+                                             scheme['type'])
+
+        return response[0] if response else None
+
+    def get_charging_status (self):
+        """
+        Devuelve el estado de carga para la batería.
+        0x0120 Charging status - 2 byte (0x00-0x06)
+        """
+        scheme = self.sectionMap['charging_status']
+
+        if self.DEBUG:
+            print('Leyendo estado de carga para la batería')
+
+        response = self.serial.read_register(scheme['address'], scheme['bytes'],
+                                             scheme['type'])
+
+        return response[0] & 0x00ff if response else None
+
+    def get_charging_status_label (self):
+        """
+        Devuelve el estado de la batería.
+        0x0120 Charging status - 2 byte (string from self.CHARGING_STATE)
+        """
+        if self.DEBUG:
+            print('Leyendo estado de carga (string) para la batería')
+
+        charging_status = self.get_charging_status()
+
+        return self.CHARGING_STATE.get(
+            self.get_charging_status()) if charging_status else None
+
+    def get_nominal_battery_capacity (self):
+        """
+        Devuelve la capacidad nominal de la batería.
+        0xE002 Nominal battery capacity - 2 byte (Ah)
+        """
+        scheme = self.sectionMap['nominal_battery_capacity']
+
+        if self.DEBUG:
+            print('Leyendo capacidad nominal de la batería')
+
+        response = self.serial.read_register(scheme['address'], scheme['bytes'],
+                                             scheme['type'])
+
+        return response[0] if response else None
+
+    def get_battery_type (self):
+        """
+        Devuelve el tipo de batería.
+        0xE004 Battery type - 2 byte (string from self.BATTERY_TYPE)
+        """
+        scheme = self.sectionMap['battery_type']
+
+        if self.DEBUG:
+            print('Leyendo tipo de batería')
+
+        response = self.serial.read_register(scheme['address'], scheme['bytes'],
+                                             scheme['type'])
+
+        return self.BATTERY_TYPE.get(response[0]) if response else None
+
     def get_today_historical_info_datas (self):
         """
         Devuelve una lista con los datos históricos para el día actual
@@ -851,6 +964,8 @@ class RenogyRoverLi(AbstractModel):
             'serial_number': self.get_serial_number(),
             'system_voltage_current': self.get_system_voltage_current(),
             'system_intensity_current': self.get_system_intensity_current(),
+            'battery_type': self.get_battery_type(),
+            'nominal_battery_capacity': self.get_nominal_battery_capacity(),
         }
 
     def get_all_solar_panel_info_datas (self):
@@ -880,6 +995,10 @@ class RenogyRoverLi(AbstractModel):
             'solar_voltage': self.get_solar_voltage(),
             'solar_current': self.get_solar_current(),
             'solar_power': self.get_solar_power(),
+            'street_light_status': self.get_street_light_status(),
+            'street_light_brightness': self.get_street_light_brightness(),
+            'charging_status': self.get_charging_status(),
+            'charging_status_label': self.get_charging_status_label(),
         }
 
     def tablemodel (self):
