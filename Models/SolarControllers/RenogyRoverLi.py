@@ -263,6 +263,48 @@ class RenogyRoverLi(AbstractModel):
         },
     }
 
+
+    """
+    TOFIX:
+    
+    Hay que hacer corregir para obtener correctamente los datos.
+
+    
+    'street_light_status': True, 
+    'street_light_brightness'32768
+    
+    Leyendo estado de la luz en la calle
+    Registro: 288, Valor: [32768, 0]
+    
+    Leyendo brillo de la luz en la calle
+    Registro: 288, Valor: [32768, 0]
+    """
+
+    """
+    TOFIX:
+    
+    Hay que hacer corregir para obtener correctamente los datos.
+    
+    'historical_total_charging_amp_hours': 0, 
+    'historical_total_discharging_amp_hours': 0, 
+    'historical_cumulative_power_generation': 0, 
+    'historical_cumulative_power_consumption': 0
+    
+    Leyendo carga total en Ah
+    Registro: 280, Valor: [0, 1931, 0, 1768]
+    
+    Leyendo descarga total en Ah
+    Registro: 282, Valor: [0, 1768, 0, 25879]
+    
+    Devuelve la potencia generada acumulada en el tiempo.
+    Registro: 284, Valor: [0, 25879, 0, 22609]
+    
+    Devuelve la potencia consumida acumulada en el tiempo.
+    Registro: 286, Valor: [0, 22609, 32768, 0]
+    """
+
+
+
     def __init__ (self, debug=False, port='/dev/ttyUSB0'):
         self.DEBUG = debug
         self.serial = SerialConnection(port=port, debug=debug, baudrate=9600,
@@ -810,7 +852,13 @@ class RenogyRoverLi(AbstractModel):
         scheme = self.sectionMap['historical_cumulative_power_generation']
 
         if self.DEBUG:
-            print('Leyendo potencia generada en el día actual')
+            print('Devuelve la potencia generada acumulada en el tiempo.')
+
+        """
+        TOFIX
+        """
+
+        return None
 
         response = self.serial.read_register(scheme['address'], scheme['bytes'],
                                              scheme['type'])
@@ -825,7 +873,13 @@ class RenogyRoverLi(AbstractModel):
         scheme = self.sectionMap['historical_cumulative_power_consumption']
 
         if self.DEBUG:
-            print('Leyendo potencia consumida en el día actual')
+            print('Devuelve la potencia consumida acumulada en el tiempo.')
+
+        """
+        TOFIX
+        """
+
+        return None
 
         response = self.serial.read_register(scheme['address'], scheme['bytes'],
                                              scheme['type'])
@@ -842,6 +896,12 @@ class RenogyRoverLi(AbstractModel):
         if self.DEBUG:
             print('Leyendo estado de la luz en la calle')
 
+        """
+        TOFIX
+        """
+
+        return None
+
         response = self.serial.read_register(scheme['address'], scheme['bytes'],
                                              scheme['type'])
 
@@ -856,6 +916,12 @@ class RenogyRoverLi(AbstractModel):
 
         if self.DEBUG:
             print('Leyendo brillo de la luz en la calle')
+
+        """
+        TOFIX
+        """
+
+        return None
 
         response = self.serial.read_register(scheme['address'], scheme['bytes'],
                                              scheme['type'])
