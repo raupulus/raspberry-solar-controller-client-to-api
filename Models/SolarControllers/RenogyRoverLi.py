@@ -291,11 +291,11 @@ class RenogyRoverLi(AbstractModel):
 
         return None
 
-    def controller_temperature(self):
+    def get_controller_temperature(self):
         """
         Devuelve la temperatura del controlador de carga
         """
-        scheme = self.sectionMap['battery_temperature']
+        scheme = self.sectionMap['controller_temperature']
 
         if self.DEBUG:
             print('Leyendo temperatura del controlador solar')
@@ -326,10 +326,15 @@ class RenogyRoverLi(AbstractModel):
         return datas
 
     def get_all_datas (self):
+        """
+        Devuelve todos los datos del controlador de carga solar
+        :return:
+        """
         datas = {
             'battery_voltage': self.get_battery_voltage(),
             'battery_temperature': self.get_battery_temperature(),
             'battery_percentage': self.get_battery_percentage(),
+            'controller_temperature': self.get_controller_temperature(),
         }
 
         return datas
