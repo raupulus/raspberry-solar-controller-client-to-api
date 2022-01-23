@@ -201,6 +201,21 @@ class RenogyRoverLi(AbstractModel):
             'address': 0x0114,
             'type': 'int',
         },
+        'historical_total_days_operating': {
+            'bytes': 2,
+            'address': 0x0115,
+            'type': 'int',
+        },
+        'historical_total_number_battery_over_discharges': {
+            'bytes': 2,
+            'address': 0x0116,
+            'type': 'int',
+        },
+        'historical_total_number_battery_full_charges': {
+            'bytes': 2,
+            'address': 0x0117,
+            'type': 'int',
+        },
     }
 
     def __init__ (self, debug=False, port='/dev/ttyUSB0'):
@@ -666,6 +681,51 @@ class RenogyRoverLi(AbstractModel):
 
         return response[0] if response else None
 
+    def get_historical_total_days_operating(self):
+        """
+        Devuelve el número de días que el controlador ha estado operativo.
+        0x0115 Total number of operating days - 2 bytes
+        """
+        scheme = self.sectionMap['historical_total_days_operating']
+
+        if self.DEBUG:
+            print('Leyendo número de días operativo el controlador solar')
+
+        response = self.serial.read_register(scheme['address'], scheme['bytes'],
+                                             scheme['type'])
+
+        return response[0] if response else None
+
+    def get_historical_total_number_battery_over_discharges(self):
+        """
+        Devuelve el número de sobre descargas de la batería.
+        0x0116 Total number of battery over-discharges - 2 bytes
+        """
+        scheme = self.sectionMap['historical_total_number_battery_over_discharges']
+
+        if self.DEBUG:
+            print('Leyendo número de descargas de la batería')
+
+        response = self.serial.read_register(scheme['address'], scheme['bytes'],
+                                             scheme['type'])
+
+        return response[0] if response else None
+
+    def get_historical_total_number_battery_full_charges(self):
+        """
+        Devuelve el número de cargas completas de la batería.
+        0x0117 Total number of battery full-charges - 2 bytes
+        """
+        scheme = self.sectionMap['historical_total_number_battery_full_charges']
+
+        if self.DEBUG:
+            print('Leyendo número de cargas completas de la batería')
+
+        response = self.serial.read_register(scheme['address'], scheme['bytes'],
+                                             scheme['type'])
+
+        return response[0] if response else None
+
     def get_today_historical_info_datas (self):
         """
         Devuelve una lista con los datos históricos para el día actual
@@ -680,7 +740,10 @@ class RenogyRoverLi(AbstractModel):
             'today_charging_amp_hours': self.get_today_charging_amp_hours(),
             'today_discharging_amp_hours': self.get_today_discharging_amp_hours(),
             'today_power_generation': self.get_today_power_generation(),
-            'today_power_consumition': self.get_today_power_consumition()
+            'today_power_consumition': self.get_today_power_consumition(),
+            'historical_total_days_operating': self.get_historical_total_days_operating(),
+            'historical_total_number_battery_over_discharges': self.get_historical_total_number_battery_over_discharges(),
+            'historical_total_number_battery_full_charges': self.get_historical_total_number_battery_full_charges(),
         }
 
     def get_historical_info_datas (self):
