@@ -65,9 +65,6 @@ sleep = time.sleep
 
 
 class RenogyRoverLi(AbstractModel):
-    serial = None
-    DEBUG = False
-
     tablename = 'renogy_rover_li'
 
     sectionMap = {

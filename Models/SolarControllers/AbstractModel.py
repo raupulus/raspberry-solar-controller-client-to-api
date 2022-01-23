@@ -56,6 +56,9 @@ from abc import ABC, abstractmethod
 #######################################
 
 class AbstractModel(ABC):
+    serial = None
+    DEBUG = False
+
     """
     Tipos de baterías.
     """
@@ -79,6 +82,14 @@ class AbstractModel(ABC):
         5: 'floating',
         6: 'current limiting'
     }
+
+    @property
+    def sectionMap (self):
+        """
+        Devuelve un diccionario con los datos de la sección.
+        :return:
+        """
+        pass
 
     @property
     def table_name (self):
