@@ -136,6 +136,21 @@ class RenogyRoverLi(AbstractModel):
             'address': 0x106,
             'type': 'float',
         },
+        'solar_voltage': {
+            'bytes': 2,
+            'address': 0x107,
+            'type': 'float',
+        },
+        'solar_current': {
+            'bytes': 2,
+            'address': 0x108,
+            'type': 'float',
+        },
+        'solar_power': {
+            'bytes': 2,
+            'address': 0x109,
+            'type': 'float',
+        },
     }
 
     def __init__ (self, debug=False, port='/dev/ttyUSB0'):
@@ -394,13 +409,60 @@ class RenogyRoverLi(AbstractModel):
 
         return response[0] if response else None
 
+    def get_solar_voltage(self):
+        """
+        Devuelve la tensión del panel solar actualmente.
+        0x0107 Solar panel voltage
+        Solar panel voltage * 0.1 (V)
+        """
+        scheme = self.sectionMap['solar_voltage']
+
+        if self.DEBUG:
+            print('Leyendo voltaje del panel solar actualmente')
+
+        response = self.serial.read_register(scheme['address'], scheme['bytes'],
+                                             scheme['type'])
+
+        return float(response[0]) / 10 if response else None
+
+    def get_solar_current(self):
+        """
+        Devuelve la intensidad del panel solar actualmente.
+        0x0108 Solar panel current (to controller)
+        Solar panel current * 0.01 (A)
+        """
+        scheme = self.sectionMap['solar_current']
+
+        if self.DEBUG:
+            print('Leyendo intensidad del panel solar actualmente')
+
+        response = self.serial.read_register(scheme['address'], scheme['bytes'],
+                                             scheme['type'])
+
+        return float(response[0]) / 100 if response else None
+
+    def get_solar_power(self):
+        """
+        Devuelve la potencia del panel solar actualmente.
+        0x0109 Solar charging power
+        Solar charging power (W)
+        """
+        scheme = self.sectionMap['solar_power']
+
+        if self.DEBUG:
+            print('Leyendo potencia del panel solar actualmente')
+
+        response = self.serial.read_register(scheme['address'], scheme['bytes'],
+                                             scheme['type'])
+
+        return response[0] if response else None
+
     def get_controller_info (self):
         """
         Devuelve información del controlador de carga solar.
         :return:
         """
-        # TODO → Devolver modelo, versión, número de serie, etc.
-        datas = {
+        return {
             'hardware': self.get_hardware(),
             'version': self.get_version(),
             'serial_number': self.get_serial_number(),
@@ -408,14 +470,23 @@ class RenogyRoverLi(AbstractModel):
             'system_intensity_current': self.get_system_intensity_current(),
         }
 
-        return datas
+    def get_all_solar_panel_info_datas(self):
+        """
+        Devuelve toda la información de los paneles solares.
+        :return:
+        """
+        return {
+            'solar_current': self.get_solar_current(),
+            'solar_voltage': self.get_solar_voltage(),
+            'solar_power': self.get_solar_power(),
+        }
 
     def get_all_datas (self):
         """
         Devuelve todos los datos del controlador de carga solar
         :return:
         """
-        datas = {
+        return {
             'battery_voltage': self.get_battery_voltage(),
             'battery_temperature': self.get_battery_temperature(),
             'battery_percentage': self.get_battery_percentage(),
@@ -423,9 +494,10 @@ class RenogyRoverLi(AbstractModel):
             'load_voltage': self.get_load_voltage(),
             'load_current': self.get_load_current(),
             'load_power': self.get_load_power(),
+            'solar_current': self.get_solar_current(),
+            'solar_voltage': self.get_solar_voltage(),
+            'solar_power': self.get_solar_power(),
         }
-
-        return datas
 
     def tablemodel (self):
         """
