@@ -82,7 +82,7 @@ class SerialConnection:
         """
         return self.client.close()
 
-    def read_register (self, register, bits=2, type=None):
+    def read_register (self, register, bits=2, type_data=None):
         """
         Lee un registro y devuelve su resultado.
         :param register:
@@ -100,11 +100,14 @@ class SerialConnection:
 
         value = response.registers[0] if response.registers else None
 
-        if value and type == 'string':
+        if self.DEBUG:
+            print(type(value))
+
+        if value and type_data == 'string':
             return str(value)
-        elif value and type == 'int':
+        elif value and type_data == 'int':
             return int(value)
-        elif value and type == 'float':
+        elif value and type_data == 'float':
             return float(value)
 
         return value

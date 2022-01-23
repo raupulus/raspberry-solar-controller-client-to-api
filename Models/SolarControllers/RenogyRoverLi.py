@@ -285,6 +285,14 @@ class RenogyRoverLi(AbstractModel):
 
         return None
 
+    def controller_info (self):
+        """
+        Devuelve información del controlador de carga solar.
+        :return:
+        """
+        # TODO → Devolver modelo, versión, número de serie, etc.
+        pass
+
     def get_all_datas (self):
         datas = {
             'system_voltage_current': self.get_system_voltage_current(),
