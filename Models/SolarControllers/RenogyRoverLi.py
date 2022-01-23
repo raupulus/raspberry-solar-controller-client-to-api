@@ -128,7 +128,7 @@ class RenogyRoverLi(AbstractModel):
         """
         Devuelve el voltaje actual de consumo en el sistema
         """
-        scheme = self.sectionMap['hardware']
+        scheme = self.sectionMap['system_voltage_current']
 
         while True:
             if self.DEBUG:
@@ -155,7 +155,7 @@ class RenogyRoverLi(AbstractModel):
         """
         Devuelve el consumo en amperios actual de consumo en el sistema
         """
-        scheme = self.sectionMap['hardware']
+        scheme = self.sectionMap['system_intensity_current']
 
         while True:
             try:

@@ -103,11 +103,11 @@ class SerialConnection:
         if self.DEBUG:
             print(type(value))
 
-        if value and type_data == 'string':
+        if value and type_data and type_data == 'string':
             return str(value)
-        elif value and type_data == 'int':
+        elif value and type_data and type_data == 'int':
             return int(value)
-        elif value and type_data == 'float':
+        elif value and type_data and type_data == 'float':
             return float(value)
 
         return value
