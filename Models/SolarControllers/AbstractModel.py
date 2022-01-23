@@ -85,14 +85,3 @@ class AbstractModel(ABC):
         """
         pass
 
-    def msg (self, message):
-        """
-        Muestra mensajes solo cuando está activado el modo debug.
-        :param message:
-        :return:
-        if not self.has_debug:
-            return
-        """
-
-        print('\n')
-        print(message)
