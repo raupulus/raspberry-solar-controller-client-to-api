@@ -41,300 +41,125 @@
 #######################################
 # #           Descripción           # #
 #######################################
+## Obtiene la información del controlador solar, la almacena en base de datos
+## e intenta posteriormente subir la información a la nube.
 ##
+## Almacenarla en base de datos implica poder trabajar sin depender de internet
+## por si es el caso (como en mi situación) que por la noche quedan los
+## routers y modem desconectados. De esta forma aunque no sea en tiempo real
+## puedo observar esos datos y almacenarlos en la nube.
 ##
 
 #######################################
 # #       Importar Librerías        # #
 #######################################
+from Models.SolarControllers.RenogyRoverLi import RenogyRoverLi
+# from Models.ApiConnection import ApiConnection
+# from Models.DbConnection import DbConnection
+from dotenv import load_dotenv
+import os
+import datetime
+import time
 
+# Cargo archivos de configuración desde .env sobreescribiendo variables locales.
+load_dotenv(override=True)
+
+#######################################
+# #             Variables           # #
+#######################################
+
+sleep = time.sleep
+
+# Debug
+DEBUG = os.getenv("DEBUG") == "True"
+
+# Puerto de la interfaz serial
+PORT = os.getenv("PORT")
+
+# Abro conexión con la base de datos instanciando el modelo que la representa.
+# dbconnection = Dbconnection()
+
+# Parámetros para acceder a la API.
+# apiconnection = Apiconnection()
+
+# Controlador solar
+solar_controller = RenogyRoverLi(debug=DEBUG, port=PORT)
 
 
 #######################################
 # #            FUNCIONES            # #
 #######################################
 
-"""
-Driver for the Renogy Rover Solar Controller using the Modbus RTU protocol
-"""
 
-import minimalmodbus
-import time
+def loop ():
+    # Contador de lecturas desde la última subida a la API
+    n_lecturas = 0
 
-sleep = time.sleep
+    while True:
+        n_lecturas = n_lecturas + 1
 
-DEBUG = True
+        if DEBUG:
+            print('Lecturas de sensores desde la última subida: ' + str(
+                n_lecturas))
 
-minimalmodbus.BAUDRATE = 9600
-minimalmodbus.MODE_RTU = 'rtu'
-minimalmodbus.TIMEOUT = 0.05
-minimalmodbus.PARITY = 'N'
-minimalmodbus.BYTESIZE = 8
-minimalmodbus.STOPBITS = 1
-minimalmodbus.CLOSE_PORT_AFTER_EACH_CALL = True
-minimalmodbus.Instrument.debug = True
-minimalmodbus.Instrument.BAUDRATE = 9600
-minimalmodbus.BYTEORDER_LITTLE = 1
+        # Guardo el momento que inicia lectura.
+        marca_inicio = datetime.datetime.now(tz=None)
 
-BATTERY_TYPE = {
-    1: 'open',
-    2: 'sealed',
-    3: 'gel',
-    4: 'lithium',
-    5: 'self-customized'
-}
+        # Leyendo controlador solar
+        datas = solar_controller.get_all_datas()
 
-CHARGING_STATE = {
-    0: 'deactivated',
-    1: 'activated',
-    2: 'mppt',
-    3: 'equalizing',
-    4: 'boost',
-    5: 'floating',
-    6: 'current limiting'
-}
+        if DEBUG:
+            print('Datos obtenidos: ' + str(datas))
 
+        # Almacena en la base de datos.
+        # save_to_db(dbconnection)
 
-class RenogyRover(minimalmodbus.Instrument):
+        if n_lecturas == 1:
+            n_lecturas = 0
 
-    """
-    Communicates using the Modbus RTU protocol (via provided USB<->RS232 cable)
-    """
-
-    def __init__(self, portname, slaveaddress):
-
-        minimalmodbus.Instrument.__init__(self, portname, slaveaddress)
-
-    def model(self):
-        """
-        Read the controller's model information
-        """
-        return self.read_string(12, numberOfRegisters=8)
-
-    def system_voltage_current(self):
-        """
-        Read the controler's system voltage and current
-        Returns a tuple of (voltage, current)
-        """
-
-        while True:
             try:
+                pass
+                # upload_data_to_api(apiconnection, dbconnection)
+            except():
+                if DEBUG:
+                    print('Error al subir datos a la api')
 
-                register = self.read_register(10)
+        # Muestro tiempo en realizarse la lectura de datos.
+        if DEBUG:
+            print('Inicio: ', str(marca_inicio))
+        marca_fin = datetime.datetime.now(tz=None)
 
-                print(register)
-                amps = register & 0x00ff
-                voltage = register >> 8
-                return (voltage, amps)
-            except Exception(e):
-                print(e)
-                sleep(5)
+        if DEBUG:
+            print('Fin: ', str(marca_fin))
 
-        return None
+        tiempo_ejecucion = marca_fin - marca_inicio
 
-    def version(self):
-        """
-        Read the controler's software and hardware version information
-        Returns a tuple of (software version, hardware version)
-        """
-        registers = self.read_registers(20, 4)
-        soft_major = registers[0] & 0x00ff
-        soft_minor = registers[1] >> 8
-        soft_patch = registers[1] & 0x00ff
-        hard_major = registers[2] & 0x00ff
-        hard_minor = registers[3] >> 8
-        hard_patch = registers[3] & 0x00ff
-        software_version = 'V{}.{}.{}'.format(
-            soft_major, soft_minor, soft_patch)
-        hardware_version = 'V{}.{}.{}'.format(
-            hard_major, hard_minor, hard_patch)
-        return (software_version, hardware_version)
+        if DEBUG:
+            print('Tiempo de ejecución: ', str(tiempo_ejecucion))
 
-    def serial_number(self):
-        """
-        Read the controller's serial number
-        """
-        registers = self.read_registers(24, 2)
-        return '{}{}'.format(registers[0], registers[1])
+        # Pausa entre cada lectura
+        sleep(30)
 
-    def battery_percentage(self):
-        """
-        Read the battery percentage
-        """
-        return self.read_register(256) & 0x00ff
+    # Acciones tras terminar con error
+    # dbconnection.close_connection()
 
-    def battery_voltage(self):
-        """
-        Read the battery voltage
-        """
-        return self.read_register(257, numberOfDecimals=1)
 
-    def battery_temperature(self):
-        """
-        Read the battery surface temperature
-        """
-        while True:
-            try:
+def main ():
+    print('Iniciando Aplicación')
 
-                register = self.read_register(259)
-                battery_temp_bits = register & 0x00ff
-                temp_value = battery_temp_bits & 0x0ff
-                sign = battery_temp_bits >> 7
-                battery_temp = -(temp_value - 128) if sign == 1 else temp_value
-                return battery_temp
-            except Exception as e:
-                print(e)
-                sleep(5)
+    # Pauso 6 segundos para dar margen a la interfaz si estuviera preparándose.
+    sleep(6)
 
-        return None
-
-    def controller_temperature(self):
-        """
-        Read the controller temperature
-        """
-        register = self.read_register(259)
-        controller_temp_bits = register >> 8
-        temp_value = controller_temp_bits & 0x0ff
-        sign = controller_temp_bits >> 7
-        controller_temp = -(temp_value - 128) if sign == 1 else temp_value
-        return controller_temp
-
-    def load_voltage(self):
-        """
-        Read load (raspberrypi) voltage
-        """
-        return self.read_register(260, numberOfDecimals=1)
-
-    def load_current(self):
-        """
-        Read load (raspberrypi) current
-        """
-        return self.read_register(261, numberOfDecimals=2)
-
-    def load_power(self):
-        """
-        Read load (raspberrypi) power
-        """
-        return self.read_register(262)
-
-    def solar_voltage(self):
-        """
-        Read solar voltage
-        """
-        return self.read_register(263, numberOfDecimals=1)
-
-    def solar_current(self):
-        """
-        Read solar current
-        """
-        return self.read_register(264, numberOfDecimals=2)
-
-    def solar_power(self):
-        """
-        Read solar power
-        """
-        return self.read_register(265)
-
-    def charging_amp_hours_today(self):
-        """
-        Read charging amp hours for the current day
-        """
-        return self.read_register(273)
-
-    def discharging_amp_hours_today(self):
-        """
-        Read discharging amp hours for the current day
-        """
-        return self.read_register(274)
-
-    def power_generation_today(self):
-
-        return self.read_register(275)
-
-    def charging_status(self):
-
-        return self.read_register(288) & 0x00ff
-
-    def charging_status_label(self):
-
-        return CHARGING_STATE.get(self.charging_status())
-
-    def battery_capacity(self):
-
-        return self.read_register(57346)
-
-    def voltage_setting(self):
-
-        register = self.read_register(57347)
-        setting = register >> 8
-        recognized_voltage = register & 0x00ff
-        return (setting, recognized_voltage)
-
-    def battery_type(self):
-
-        register = self.read_register(57348)
-        return BATTERY_TYPE.get(register)
-
-    # TODO: resume at 3.10 of spec
+    try:
+        loop()
+    except Exception as e:
+        print('Ha ocurrido un error en la aplicación:', e.__class__.__name__)
+        sleep(300)
+        main()
+    exit(0)
 
 
 if __name__ == "__main__":
+    main()
 
-    """
-    for x in range(0, 255):
-        try:
-            print('Leyendo rango: ', x)
-            rover = RenogyRover('/dev/ttyUSB0', x)
-            print('Version: ', rover.version())
-            print('Serial_number: ', rover.serial_number())
-            break
-        except Exception as e:
-            print('Nada en rango', x)
-    """
-
-    rover = RenogyRover('/dev/ttyUSB0', 1)
- #   print('Model: ', rover.model())
-    print('Version: ', rover.version())
-    print('Serial_number: ', rover.serial_number())
-    print('Battery %: ', rover.battery_percentage())
-    # print('Battery Type: ', rover.battery_type())
-    # print('Battery Capacity: ', rover.battery_capacity())
-    # print('Battery Voltage: ', rover.battery_voltage())
-
-    battery_temp = rover.battery_temperature()
-
-    print('Battery Temperature: ', battery_temp, battery_temp * 1.8 + 32)
-
-    controller_temp = rover.controller_temperature()
-
-    # print('Controller Temperature: ', controller_temp, controller_temp * 1.8 + 32)
-    # print('Load Voltage: ', rover.load_voltage())
-    # print('Load Current: ', rover.load_current())
-    # print('Load Power: ', rover.load_power())
-    # print('Charging Status: ', rover.charging_status_label())
-    # print 'solar ' 'voltage='+str(rover.solar_voltage())
-    # print('Solar Current: ', rover.solar_current())
-    # print('Solar Power: ', rover.solar_power())
-    # print('Power Generated Today (kilowatt hours): ', rover.power_generation_today())
-    # print('Charging Amp/Hours Today: ', rover.charging_amp_hours_today())
-    # print('Discharging Amp/Hours Today: ', rover.discharging_amp_hours_today())
-    print("solar_shed " "solar_volts="+str(rover.solar_voltage())+",amp_charge_today="+str(rover.charging_amp_hours_today())+",amp_discharge_today="+str(rover.discharging_amp_hours_today())+",battery_percent="+str(rover.battery_percentage())+",battery_volts="+str(rover.battery_voltage())+",solar_amps="+str(rover.solar_current()
-                                                                                                                                                                                                                                                                                                                    )+",load_volts="+str(rover.load_voltage())+",load_amps="+str(rover.load_current())+",load_watts="+str(rover.load_power())+",solar_watts="+str(rover.solar_power())+",watts_gen_today="+str(rover.power_generation_today())+",temp_controller="+str(controller_temp * 1.8 + 32)+",temp_battery="+str(battery_temp * 1.8 + 32))
-
-
-# Necesita módulos → pip3 install -U minimalmodbus modbus
-# sudo apt install python3-serial python3-pymodbus python3-dbus python3-serial
-
-## TODO → Crear interfaz para todos los modelos de controladores solares
-## Crear modelo para controlador solar renogy-rover
-## Crear clase para modelo de datos obtenidos del controlador solar
-## Crear clase para la conexión a la db
-## Crear clase para representar la conexión a la api
-
-
-
-
-
-
-
-
+# sudo apt install python3-dotenv python3-serial python3-pyserial
