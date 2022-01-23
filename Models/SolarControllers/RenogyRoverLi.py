@@ -116,6 +116,11 @@ class RenogyRoverLi(AbstractModel):
             'address': 0x103,
             'type': 'float',
         },
+        'controller_temperature': {
+            'bytes': 1,
+            'address': 0x103,
+            'type': 'float',
+        },
     }
 
     def __init__ (self, debug=False, port='/dev/ttyUSB0'):
@@ -262,7 +267,7 @@ class RenogyRoverLi(AbstractModel):
 
     def get_battery_temperature (self):
         """
-        Devuelve la temperatura de la batería
+        Devuelve la temperatura de la batería en su exterior (sensor externo)
         """
         scheme = self.sectionMap['battery_temperature']
 
@@ -271,10 +276,10 @@ class RenogyRoverLi(AbstractModel):
                 if self.DEBUG:
                     print('Leyendo temperatura de batería')
 
-                register = self.serial.read_register(scheme['address'],
+                response = self.serial.read_register(scheme['address'],
                                                      scheme['bytes'],
                                                      scheme['type'])
-                battery_temp_bits = register & 0x00ff
+                battery_temp_bits = response & 0x00ff
                 temp_value = battery_temp_bits & 0x0ff
                 sign = battery_temp_bits >> 7
                 battery_temp = -(temp_value - 128) if sign == 1 else temp_value
@@ -286,24 +291,30 @@ class RenogyRoverLi(AbstractModel):
 
         return None
 
-    def controller_info (self):
+    def controller_temperature(self):
         """
-        Devuelve información del controlador de carga solar.
-        :return:
+        Devuelve la temperatura del controlador de carga
         """
-        # TODO → Devolver modelo, versión, número de serie, etc.
-        datas = {
-            'hardware': self.get_hardware(),
-            'version': self.get_version(),
-            'serial_number': self.get_serial_number(),
-        }
+        scheme = self.sectionMap['battery_temperature']
+
+        if self.DEBUG:
+            print('Leyendo temperatura del controlador solar')
+
+        register = self.serial.read_register(scheme['address'],
+                                             scheme['bytes'],
+                                             scheme['type'])
+        controller_temp_bits = register >> 8
+        temp_value = controller_temp_bits & 0x0ff
+        sign = controller_temp_bits >> 7
+
+        return -(temp_value - 128) if sign == 1 else temp_value
+
+
 
         return datas
 
     def get_all_datas (self):
         datas = {
-            'system_voltage_current': self.get_system_voltage_current(),
-            'system_intensity_current': self.get_system_intensity_current(),
             'battery_voltage': self.get_battery_voltage(),
             'battery_temperature': self.get_battery_temperature(),
             'battery_percentage': self.get_battery_percentage(),
