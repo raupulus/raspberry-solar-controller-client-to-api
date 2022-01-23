@@ -101,6 +101,10 @@ class SerialConnection:
 
         if value and type == 'string':
             return str(value)
+        elif value and type == 'int':
+            return int(value)
+        elif value and type == 'float':
+            return float(value)
 
         return value
 
