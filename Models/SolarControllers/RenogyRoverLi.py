@@ -169,7 +169,7 @@ class RenogyRoverLi(AbstractModel):
         """
         Devuelve el consumo en amperios actual de consumo en el sistema
         0x000A
-        [1] → 8 lower bits: rated charging current (A)
+        lower bits: rated charging current (A)
         """
         scheme = self.sectionMap['system_intensity_current']
 
@@ -182,7 +182,7 @@ class RenogyRoverLi(AbstractModel):
                                                      scheme['bytes'],
                                                      scheme['type'])
 
-                amps = response[1] & 0x00ff
+                amps = response[0] & 0x00ff
 
                 return amps
             except Exception as e:
@@ -286,7 +286,7 @@ class RenogyRoverLi(AbstractModel):
         response = self.serial.read_register(scheme['address'], scheme['bytes'],
                                              scheme['type'])
 
-        return response[0] if response else None
+        return float(response[0]) / 10 if response else None
 
     def get_battery_temperature (self):
         """
@@ -304,7 +304,7 @@ class RenogyRoverLi(AbstractModel):
                 response = self.serial.read_register(scheme['address'],
                                                      scheme['bytes'],
                                                      scheme['type'])
-                battery_temp_bits = response[1] & 0x00ff
+                battery_temp_bits = response[0] & 0x00ff
                 temp_value = battery_temp_bits & 0x0ff
                 sign = battery_temp_bits >> 7
 
@@ -342,7 +342,7 @@ class RenogyRoverLi(AbstractModel):
         0x0104 Load voltage 2 bytes
         Street light voltage * 0.1 (V)
         """
-        scheme = self.sectionMap['controller_temperature']
+        scheme = self.sectionMap['load_voltage']
 
         if self.DEBUG:
             print('Leyendo voltaje para la carga actual de consumo')
@@ -350,7 +350,7 @@ class RenogyRoverLi(AbstractModel):
         response = self.serial.read_register(scheme['address'], scheme['bytes'],
                                              scheme['type'])
 
-        return response[0] if response else None
+        return float(response[0]) / 10 if response else None
 
     def get_controller_info (self):
         """
