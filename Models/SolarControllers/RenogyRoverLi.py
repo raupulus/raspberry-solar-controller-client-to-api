@@ -126,6 +126,11 @@ class RenogyRoverLi(AbstractModel):
             'address': 0x104,
             'type': 'float',
         },
+        'load_current': {
+            'bytes': 2,
+            'address': 0x105,
+            'type': 'float',
+        },
     }
 
     def __init__ (self, debug=False, port='/dev/ttyUSB0'):
@@ -352,6 +357,22 @@ class RenogyRoverLi(AbstractModel):
 
         return float(response[0]) / 10 if response else None
 
+    def get_load_current(self):
+        """
+        Devuelve la intensidad de la carga actual
+        0x0105 Load current 2 bytes
+        Street light current * 0.01 (A)
+        """
+        scheme = self.sectionMap['load_current']
+
+        if self.DEBUG:
+            print('Leyendo voltaje para la carga actual de consumo')
+
+        response = self.serial.read_register(scheme['address'], scheme['bytes'],
+                                             scheme['type'])
+
+        return float(response[0]) / 100 if response else None
+
     def get_controller_info (self):
         """
         Devuelve información del controlador de carga solar.
@@ -379,6 +400,7 @@ class RenogyRoverLi(AbstractModel):
             'battery_percentage': self.get_battery_percentage(),
             'controller_temperature': self.get_controller_temperature(),
             'load_voltage': self.get_load_voltage(),
+            'load_current': self.get_load_current(),
         }
 
         return datas
