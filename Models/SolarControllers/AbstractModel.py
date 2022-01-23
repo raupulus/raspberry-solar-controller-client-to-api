@@ -56,9 +56,68 @@ from abc import ABC, abstractmethod
 #######################################
 
 class AbstractModel(ABC):
-    # Parámetros para devolver datos del modelo de base de datos
+    """
+    Tipos de baterías.
+    """
+    BATTERY_TYPE = {
+        1: 'open',
+        2: 'sealed',
+        3: 'gel',
+        4: 'lithium',
+        5: 'self-customized'
+    }
+
+    """
+    Estados de carga para la batería.
+    """
+    CHARGING_STATE = {
+        0: 'deactivated',
+        1: 'activated',
+        2: 'mppt',
+        3: 'equalizing',
+        4: 'boost',
+        5: 'floating',
+        6: 'current limiting'
+    }
+
     @property
     def table_name (self):
+        """
+        Nombre de la tabla en la base de datos.
+        :return:
+        """
+        pass
+
+    @abstractmethod
+    def get_today_historical_info_datas (self):
+        """
+        Devuelve una lista con los datos históricos para el día actual
+        :return:
+        """
+        pass
+
+    @abstractmethod
+    def get_historical_info_datas (self):
+        """
+        Devuelve una lista con los datos históricos generales
+        :return:
+        """
+        pass
+
+    @abstractmethod
+    def get_all_controller_info_datas (self):
+        """
+        Devuelve información del controlador de carga solar.
+        :return:
+        """
+        pass
+
+    @abstractmethod
+    def get_all_solar_panel_info_datas (self):
+        """
+        Devuelve toda la información de los paneles solares.
+        :return:
+        """
         pass
 
     @abstractmethod
