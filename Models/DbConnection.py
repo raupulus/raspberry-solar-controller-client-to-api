@@ -61,7 +61,7 @@ load_dotenv(override=True)
 import os
 
 
-class Dbconnection:
+class DbConnection:
     has_debug = os.getenv("DEBUG") == "True"
 
     # Datos desde .env
@@ -117,12 +117,15 @@ class Dbconnection:
             else:
                 columns.append(Column(name, type_column))
 
+        print(tablename, parameters)
+
         # Creo la tabla con las columnas antes seteadas.
         self.tables[tablename] = Table(
             tablename,
             self.meta,
             *columns,
         )
+
 
         self.meta.create_all(self.engine)
 
@@ -158,12 +161,11 @@ class Dbconnection:
             select([table]).order_by(text('created_at DESC')).limit(limit)
         ).fetchall()
 
-    def table_save_data(self, sensorname, tablename, params):
+    def table_save_data(self, tablename, params):
         """
         Almacena datos recibidos en la tabla recibida.
-        :param sensorname: Nombre del sensor sobre el que se trabaja.
         :param tablename: Nombre de la tabla en la que guardar.
-        :param params: Diccionario con los parámetros del sensor.
+        :param params: Diccionario con los datos a guardar.
         """
 
         table = self.tables[tablename]
@@ -217,9 +219,9 @@ class Dbconnection:
         '''
         pass
 
-    def truncate_all_sensors_data(self):
+    def truncate_all_tables_data(self):
         """
-        Limpia todas las tablas para los sensores establecidos.
+        Limpia todas las tablas.
         """
         pass
 

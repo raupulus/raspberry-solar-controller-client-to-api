@@ -55,7 +55,7 @@
 #######################################
 from Models.SolarControllers.RenogyRoverLi import RenogyRoverLi
 # from Models.ApiConnection import ApiConnection
-# from Models.DbConnection import DbConnection
+from Models.DbConnection import DbConnection
 from dotenv import load_dotenv
 import os
 import datetime
@@ -77,7 +77,7 @@ DEBUG = os.getenv("DEBUG") == "True"
 PORT = os.getenv("PORT")
 
 # Abro conexión con la base de datos instanciando el modelo que la representa.
-# dbconnection = Dbconnection()
+dbconnection = DbConnection()
 
 # Parámetros para acceder a la API.
 # apiconnection = Apiconnection()
@@ -85,6 +85,8 @@ PORT = os.getenv("PORT")
 # Controlador solar
 solar_controller = RenogyRoverLi(debug=DEBUG, port=PORT)
 
+# Controladores
+#controllers = {}
 
 #######################################
 # #            FUNCIONES            # #
@@ -94,6 +96,11 @@ solar_controller = RenogyRoverLi(debug=DEBUG, port=PORT)
 def loop ():
     # Contador de lecturas desde la última subida a la API
     n_lecturas = 0
+
+    if DEBUG:
+        print('Creando tabla en la base de datos')
+    # Crea la tabla para el controlador solar.
+    dbconnection.table_set_new(solar_controller.tablename, solar_controller.tablemodel())
 
     while True:
         n_lecturas = n_lecturas + 1
@@ -110,15 +117,24 @@ def loop ():
         info = solar_controller.get_all_controller_info_datas()
         historical_today = solar_controller.get_today_historical_info_datas()
         historical = solar_controller.get_historical_info_datas()
+        params = {**datas, **info, **historical_today, **historical}
 
         if DEBUG:
             print('Datos obtenidos: ' + str(datas))
             print('Información del controlador: ' + str(info))
             print('Histórico del día: ' + str(historical_today))
             print('Histórico total: ' + str(historical))
+            print("\n")
+            print('Parámetros a guardar: ' + str(params))
+
+
+        # TODO → Quitar de parámetros los que no estén en tablemodel()
 
         # Almacena en la base de datos.
-        # save_to_db(dbconnection)
+        dbconnection.table_save_data(
+            tablename=solar_controller.tablename,
+            params=params
+        )
 
         if n_lecturas == 1:
             n_lecturas = 0
@@ -147,14 +163,14 @@ def loop ():
         sleep(30)
 
     # Acciones tras terminar con error
-    # dbconnection.close_connection()
+    dbconnection.close_connection()
 
 
 def main ():
     print('Iniciando Aplicación')
 
     # Pauso 6 segundos para dar margen a la interfaz si estuviera preparándose.
-    sleep(6)
+    sleep(2)
 
     try:
         loop()
@@ -170,3 +186,6 @@ if __name__ == "__main__":
     main()
 
 # sudo apt install python3-dotenv python3-serial python3-pyserial
+# python3-postgresql python3-sqlalchemy python3-dotenv
+# sudo -u postgres createuser pi
+# sudo -u postgres createdb -O pi -T template1 sensor_data

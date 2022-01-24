@@ -51,6 +51,7 @@
 from Models.SolarControllers.AbstractModel import AbstractModel
 from Models.SerialConnection import SerialConnection
 import time
+import datetime
 
 #######################################
 # #             Variables           # #
@@ -1069,7 +1070,24 @@ class RenogyRoverLi(AbstractModel):
         Plantea campos como modelo de datos para una base de datos y poder ser
         tomados desde el exterior.
         """
-        pass
+        return {
+            'battery_voltage': {
+                'type': 'Numeric',
+                'params': {
+                    'precision': 15,
+                    'asdecimal': True,
+                    'scale': 1
+                },
+                'others': None,
+            },
+            'created_at': {
+                'type': 'DateTime',
+                'params': None,
+                'others': {
+                    'default': datetime.datetime.utcnow
+                },
+            },
+        }
 
     def debug (self):
         """
