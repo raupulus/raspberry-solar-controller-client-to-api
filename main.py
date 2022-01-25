@@ -129,11 +129,16 @@ def loop ():
 
 
         # TODO → Quitar de parámetros los que no estén en tablemodel()
+        data_to_save = {}
+
+        for key in solar_controller.tablemodel():
+            if key in params:
+                data_to_save[key] = params[key]
 
         # Almacena en la base de datos.
         dbconnection.table_save_data(
             tablename=solar_controller.tablename,
-            params=params
+            params=data_to_save
         )
 
         if n_lecturas == 1:

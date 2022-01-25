@@ -51,12 +51,13 @@
 
 import datetime
 from sqlalchemy import create_engine, Table, Column, Integer, String, \
-                       MetaData, DateTime, Numeric, select, text
+    MetaData, DateTime, Numeric, select, text
 
 from sqlalchemy.orm import sessionmaker
 
 ## Cargo archivos de configuración desde .env
 from dotenv import load_dotenv
+
 load_dotenv(override=True)
 import os
 
@@ -82,9 +83,9 @@ class DbConnection:
     # Sesión para acciones por lotes
     Session = sessionmaker(bind=engine)
 
-    tables = {}
+    tables = { }
 
-    def table_set_new(self, tablename, parameters):
+    def table_set_new (self, tablename, parameters):
         """
         Almacena una nueva tabla en el array de tablas.
         :param tablename: Nombre de la tabla.
@@ -93,7 +94,8 @@ class DbConnection:
         columns = []
 
         # Seteo la columna **id**
-        columns.append(Column('id', Integer, primary_key=True, autoincrement=True))
+        columns.append(
+            Column('id', Integer, primary_key=True, autoincrement=True))
 
         # Seteo el resto de columnas.
         for name, datas in parameters.items():
@@ -126,12 +128,11 @@ class DbConnection:
             *columns,
         )
 
-
         self.meta.create_all(self.engine)
 
         print('Tablas en la DB: ', self.engine.table_names())
 
-    def table_get_data(self, tablename):
+    def table_get_data (self, tablename):
         """
         Obtiene los datos de una tabla previamente seteada.
         :param tablename: Nombre de la tabla desde la que obtener datos.
@@ -144,7 +145,7 @@ class DbConnection:
             select([table])
         ).fetchall()
 
-    def table_get_data_last(self, tablename, limit):
+    def table_get_data_last (self, tablename, limit):
         """
         Obtiene los datos de una tabla previamente seteada limitando resultados.
         :param tablename: Nombre de la tabla desde la que obtener datos.
@@ -161,7 +162,7 @@ class DbConnection:
             select([table]).order_by(text('created_at DESC')).limit(limit)
         ).fetchall()
 
-    def table_save_data(self, tablename, params):
+    def table_save_data (self, tablename, params):
         """
         Almacena datos recibidos en la tabla recibida.
         :param tablename: Nombre de la tabla en la que guardar.
@@ -170,6 +171,7 @@ class DbConnection:
 
         table = self.tables[tablename]
 
+        print("\n")
         print('Guardando en DB: ', table, params)
 
         # Inserto Datos
@@ -178,17 +180,18 @@ class DbConnection:
             result = self.connection.execute(stmt)
             # server_created_at = result.returned_defaults['created_at']
         except Exception as e:
-            print('Ha ocurrido un problema al insertar datos', e.__class__.__name__)
+            print('Ha ocurrido un problema al insertar datos',
+                  e.__class__.__name__)
             return None
 
-    def table_truncate(self, tablename):
+    def table_truncate (self, tablename):
         """
         Vacia completamente la tabla recibida.
         :param tablename: Nombre de la tabla.
         """
         self.connection.execute(self.tables[tablename].delete())
 
-    def table_drop_last_elements(self, tablename, limit):
+    def table_drop_last_elements (self, tablename, limit):
         """
         Elimina los últimos elementos en la cantidad recibida, de una
         tabla recibida
@@ -212,20 +215,20 @@ class DbConnection:
         session.execute(query)
         session.commit()
 
-    def get_all_data(self):
+    def get_all_data (self):
         '''
         Obtiene todos los datos de la base de datos para todos los
         sensores y los devuelve organizados.
         '''
         pass
 
-    def truncate_all_tables_data(self):
+    def truncate_all_tables_data (self):
         """
         Limpia todas las tablas.
         """
         pass
 
-    def truncate_db(self):
+    def truncate_db (self):
         """
         Limpia la Base de datos completamente para comenzar a recopilar
         información desde una base de datos saneada/limpia.
@@ -238,6 +241,7 @@ class DbConnection:
         con.execute('SET FOREIGN_KEY_CHECKS = 1;')
         trans.commit()
 
-    def close_connection(self):
+    def close_connection (self):
         print('Cerrando conexión con la Base de Datos')
         self.connection.close()
+

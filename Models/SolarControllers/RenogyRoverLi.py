@@ -1043,27 +1043,48 @@ class RenogyRoverLi(AbstractModel):
             'solar_power': self.get_solar_power(),
         }
 
-    def get_all_datas (self):
+    def get_all_battery_info_datas (self):
         """
-        Devuelve todos los datos del controlador de carga solar
+        Devuelve toda la información de la batería.
         :return:
         """
         return {
             'battery_voltage': self.get_battery_voltage(),
             'battery_temperature': self.get_battery_temperature(),
             'battery_percentage': self.get_battery_percentage(),
-            'controller_temperature': self.get_controller_temperature(),
-            'load_voltage': self.get_load_voltage(),
-            'load_current': self.get_load_current(),
-            'load_power': self.get_load_power(),
-            'solar_voltage': self.get_solar_voltage(),
-            'solar_current': self.get_solar_current(),
-            'solar_power': self.get_solar_power(),
-            'street_light_status': self.get_street_light_status(),
-            'street_light_brightness': self.get_street_light_brightness(),
             'charging_status': self.get_charging_status(),
             'charging_status_label': self.get_charging_status_label(),
         }
+
+    def get_all_load_info_datas(self):
+        """
+        Devuelve toda la información de carga.
+        :return:
+        """
+        return {
+            'load_voltage': self.get_load_voltage(),
+            'load_current': self.get_load_current(),
+            'load_power': self.get_load_power(),
+        }
+
+    def get_all_datas (self):
+        """
+        Devuelve todos los datos del controlador de carga solar
+        :return:
+        """
+        return {
+            **self.get_today_historical_info_datas(),
+            **self.get_historical_info_datas(),
+            **self.get_all_controller_info_datas(),
+            **self.get_all_solar_panel_info_datas(),
+            **self.get_all_battery_info_datas(),
+            **self.get_all_load_info_datas(),
+            **{
+                'controller_temperature': self.get_controller_temperature(),
+                'street_light_status': self.get_street_light_status(),
+                'street_light_brightness': self.get_street_light_brightness(),
+            }
+       }
 
     def tablemodel (self):
         """
@@ -1074,12 +1095,293 @@ class RenogyRoverLi(AbstractModel):
             'battery_voltage': {
                 'type': 'Numeric',
                 'params': {
-                    'precision': 15,
+                    'precision': 11,
                     'asdecimal': True,
                     'scale': 1
                 },
                 'others': None,
             },
+            'battery_temperature': {
+                'type': 'Numeric',
+                'params': {
+                    'precision': 11,
+                    'asdecimal': True,
+                    'scale': 1
+                },
+                'others': None,
+            },
+            'battery_percentage': {
+                'type': 'Numeric',
+                'params': {
+                    'precision': 11,
+                    'asdecimal': False,
+                },
+                'others': None,
+            },
+            'controller_temperature': {
+                'type': 'Numeric',
+                'params': {
+                    'precision': 11,
+                    'asdecimal': True,
+                    'scale': 1
+                },
+                'others': None,
+            },
+            'load_voltage': {
+                'type': 'Numeric',
+                'params': {
+                    'precision': 11,
+                    'asdecimal': True,
+                    'scale': 1
+                },
+                'others': None,
+            },
+            'load_current': {
+                'type': 'Numeric',
+                'params': {
+                    'precision': 11,
+                    'asdecimal': True,
+                    'scale': 2
+                },
+                'others': None,
+            },
+            'load_power': {
+                'type': 'Numeric',
+                'params': {
+                    'precision': 11,
+                    'asdecimal': False,
+                },
+                'others': None,
+            },
+            'solar_voltage': {
+                'type': 'Numeric',
+                'params': {
+                    'precision': 11,
+                    'asdecimal': True,
+                    'scale': 1
+                },
+                'others': None,
+            },
+            'solar_current': {
+                'type': 'Numeric',
+                'params': {
+                    'precision': 11,
+                    'asdecimal': True,
+                    'scale': 1
+                },
+                'others': None,
+            },
+            'solar_power': {
+                'type': 'Numeric',
+                'params': {
+                    'precision': 1,
+                    'asdecimal': False,
+                },
+                'others': None,
+            },
+            'street_light_status': {
+                'type': 'Integer',
+                'params': {
+                    'precision': 15,
+                },
+                'others': None,
+            },
+            'street_light_brightness': {
+                'type': 'Numeric',
+                'params': {
+                    'precision': 11,
+                    'asdecimal': False,
+                },
+                'others': None,
+            },
+            'charging_status': {
+                'type': 'Numeric',
+                'params': {
+                    'precision': 11,
+                    'asdecimal': False,
+                },
+                'others': None,
+            },
+            'charging_status_label': {
+                'type': 'String',
+                'params': {},
+                'others': None,
+            },
+
+            'hardware': {
+                'type': 'String',
+                'params': {},
+                'others': None,
+            },
+            'version': {
+                'type': 'String',
+                'params': {},
+                'others': None,
+            },
+            'serial_number': {
+                'type': 'String',
+                'params': {},
+                'others': None,
+            },
+            'system_voltage_current': {
+                'type': 'Numeric',
+                'params': {
+                    'precision': 11,
+                    'asdecimal': True,
+                    'scale': 1
+                },
+                'others': None,
+            },
+            'system_intensity_current': {
+                'type': 'Numeric',
+                'params': {
+                    'precision': 11,
+                    'asdecimal': True,
+                    'scale': 1
+                },
+                'others': None,
+            },
+            'battery_type': {
+                'type': 'String',
+                'params': {},
+                'others': None,
+            },
+            'nominal_battery_capacity': {
+                'type': 'Numeric',
+                'params': {
+                    'precision': 11,
+                    'asdecimal': False,
+                },
+                'others': None,
+            },
+
+            'today_battery_max_voltage': {
+                'type': 'Numeric',
+                'params': {
+                    'precision': 11,
+                    'asdecimal': True,
+                    'scale': 1
+                },
+                'others': None,
+            },
+            'today_battery_min_voltage': {
+                'type': 'Numeric',
+                'params': {
+                    'precision': 11,
+                    'asdecimal': True,
+                    'scale': 1
+                },
+                'others': None,
+            },
+            'today_max_charging_current': {
+                'type': 'Numeric',
+                'params': {
+                    'precision': 11,
+                    'asdecimal': True,
+                    'scale': 2
+                },
+                'others': None,
+            },
+            'today_max_charging_power': {
+                'type': 'Numeric',
+                'params': {
+                    'precision': 11,
+                    'asdecimal': False,
+                },
+                'others': None,
+            },
+            'today_charging_amp_hours': {
+                'type': 'Numeric',
+                'params': {
+                    'precision': 11,
+                    'asdecimal': True,
+                    'scale': 1
+                },
+                'others': None,
+            },
+            'today_discharging_amp_hours': {
+                'type': 'Numeric',
+                'params': {
+                    'precision': 11,
+                    'asdecimal': True,
+                    'scale': 1
+                },
+                'others': None,
+            },
+            'today_power_generation': {
+                'type': 'Numeric',
+                'params': {
+                    'precision': 11,
+                    'asdecimal': False,
+                },
+                'others': None,
+            },
+            'today_power_consumition': {
+                'type': 'Numeric',
+                'params': {
+                    'precision': 11,
+                    'asdecimal': False,
+                },
+                'others': None,
+            },
+            'historical_total_days_operating': {
+                'type': 'Integer',
+                'params': {
+                    'precision': 11,
+                },
+                'others': None,
+            },
+            'historical_total_days_operating': {
+                'type': 'Integer',
+                'params': {
+                    'precision': 11,
+                },
+                'others': None,
+            },
+            'historical_total_number_battery_over_discharges': {
+                'type': 'Integer',
+                'params': {
+                    'precision': 11,
+                },
+                'others': None,
+            },
+            'historical_total_number_battery_full_charges': {
+                'type': 'Integer',
+                'params': {
+                    'precision': 11,
+                },
+                'others': None,
+            },
+            'historical_total_charging_amp_hours': {
+                'type': 'Integer',
+                'params': {
+                    'precision': 11,
+                },
+                'others': None,
+            },
+            'historical_total_discharging_amp_hours': {
+                'type': 'Integer',
+                'params': {
+                    'precision': 11,
+                },
+                'others': None,
+            },
+            'historical_cumulative_power_generation': {
+                'type': 'Integer',
+                'params': {
+                    'precision': 11,
+                },
+                'others': None,
+            },
+            'historical_cumulative_power_consumption': {
+                'type': 'Integer',
+                'params': {
+                    'precision': 11,
+                },
+                'others': None,
+            },
+
+
             'created_at': {
                 'type': 'DateTime',
                 'params': None,
