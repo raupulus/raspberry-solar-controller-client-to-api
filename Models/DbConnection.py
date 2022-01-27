@@ -182,6 +182,7 @@ class DbConnection:
         except Exception as e:
             print('Ha ocurrido un problema al insertar datos',
                   e.__class__.__name__)
+            print(e)
             return None
 
     def table_truncate (self, tablename):

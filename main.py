@@ -190,7 +190,7 @@ def main ():
 if __name__ == "__main__":
     main()
 
-# sudo apt install python3-dotenv python3-serial python3-pyserial
+# sudo apt install python3-dotenv python3-serial python3-pyserial python3-requests
 # python3-postgresql python3-sqlalchemy python3-dotenv
 # sudo -u postgres createuser pi
 # sudo -u postgres createdb -O pi -T template1 sensor_data

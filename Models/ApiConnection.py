@@ -42,12 +42,167 @@
 # #           Descripción           # #
 #######################################
 ##
+# # Conexión a la base de datos.
 ##
 
 #######################################
 # #       Importar Librerías        # #
 #######################################
 
+import datetime
+
+## Cargo archivos de configuración desde .env
+from dotenv import load_dotenv
+load_dotenv(override=True)
+import os
+import json
+import requests
+from requests.adapters import HTTPAdapter
+from requests.packages.urllib3.util.retry import Retry
+import time
+
 #######################################
-# #            FUNCIONES            # #
+# #             Variables           # #
 #######################################
+sleep = time.sleep
+
+#######################################
+# #             Funciones           # #
+#######################################
+
+
+class Apiconnection:
+    API_URL = os.getenv("API_URL")
+    API_TOKEN = os.getenv("API_TOKEN")
+    DEBUG = os.getenv("DEBUG") == "True"
+
+    def requests_retry_session(
+            self,
+            retries=3,
+            backoff_factor=0.3,
+            status_forcelist=(500, 502, 504),
+            session=None,
+    ):
+        """
+        Crea una sesión para reintentar envío HTTP cuando falla.
+        :param backoff_factor:
+        :param status_forcelist:
+        :param session:
+        :return:
+        """
+        session = session or requests.Session()
+
+        retry = Retry(
+            total=retries,
+            read=retries,
+            connect=retries,
+            backoff_factor=backoff_factor,
+            status_forcelist=status_forcelist,
+        )
+
+        adapter = HTTPAdapter(max_retries=retry)
+        session.mount('http://', adapter)
+        session.mount('https://', adapter)
+
+        return session
+
+    def send(self, path, datas_json):
+        """
+        Envía la petición a la API.
+        :param path: Directorio dentro de la api (ex: /api/path/endpoint)
+        :param datas_json:
+        :return: 
+        """
+
+        url = self.API_URL
+        token = self.API_TOKEN
+        full_url = url + path
+
+        data = {
+            'data': datas_json,
+            'info': 'Enviado desde Raspberry Pi'
+        }
+
+        headers = {
+            'Content-type': 'application/json',
+            'Accept': 'text/plain',
+            'Authorization': 'Bearer ' + str(token),
+        }
+
+        try:
+            req = self.requests_retry_session().post(
+                full_url,
+                data=json.dumps(data),
+                headers=headers,
+                timeout=30
+            )
+
+            if self.DEBUG:
+                print('Respuesta de API: ', req.status_code)
+                #print('Recibido: ', req.text)
+
+            # Guardado correctamente 201, con errores 200, mal 500
+            if int(req.status_code) == 201:
+                return True
+            elif int(req.status_code) == 200:
+                if self.DEBUG:
+                    print('Al guardar en la API algunos elementos tuvieron error.')
+                return True
+            else:
+                return False
+        except Exception as e:
+            if self.DEBUG:
+                print('Ha fallado la petición http :', e.__class__.__name__)
+                print(e)
+
+            sleep(5)
+
+            return False
+
+    def parse_to_json(self, rows, columns):
+        """
+        Convierte los datos recibidos en JSON
+        :param rows: Tuplas con todas las entradas desde la DB.
+        :param columns: Nombre de las columnas en orden respecto a tuplas.
+        :return: Devuelve el objeto json
+        """
+
+        result = []
+
+        # Compongo el objeto json que será devuelto.
+        for row in rows:
+            tupla = {}
+
+            # Por cada tupla creo la pareja de clave: valor
+            for iteracion in range(len(columns)):
+                cell = str(row[iteracion])
+
+                if columns[iteracion] != 'id':
+                    tupla.update({columns[iteracion]: cell})
+
+            result.append(tupla)
+
+        return json.dumps(
+            result,
+            default=None,
+            ensure_ascii=False,
+            sort_keys=True,
+            indent=4,
+        )
+
+    def upload(self, name, path, datas, columns):
+        """
+        Recibe la ruta dentro de la API y los datos a enviar para procesar la
+        subida atacando la API.
+        :param path: Ruta dentro de la api
+        :param datas: Datos a enviar
+        """
+        if datas:
+            if self.DEBUG:
+                print('Subiendo dato: ' + name + ', ruta de api: ' + path)
+
+            datas_json = self.parse_to_json(datas, columns)
+            #print('Datos formateados en JSON:', datas_json)
+            result_send = self.send(path, datas_json)
+
+            return result_send

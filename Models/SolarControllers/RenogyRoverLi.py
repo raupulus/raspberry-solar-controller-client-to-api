@@ -1174,15 +1174,16 @@ class RenogyRoverLi(AbstractModel):
             'solar_power': {
                 'type': 'Numeric',
                 'params': {
-                    'precision': 1,
+                    'precision': 11,
                     'asdecimal': False,
                 },
                 'others': None,
             },
             'street_light_status': {
-                'type': 'Integer',
+                'type': 'Numeric',
                 'params': {
-                    'precision': 15,
+                    'precision': 11,
+                    'asdecimal': False,
                 },
                 'others': None,
             },
