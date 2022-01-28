@@ -1332,13 +1332,6 @@ class RenogyRoverLi(AbstractModel):
                 },
                 'others': None,
             },
-            'historical_total_days_operating': {
-                'type': 'Integer',
-                'params': {
-                    'precision': 11,
-                },
-                'others': None,
-            },
             'historical_total_number_battery_over_discharges': {
                 'type': 'Integer',
                 'params': {
