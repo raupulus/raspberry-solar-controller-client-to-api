@@ -165,7 +165,7 @@ def loop ():
             print('Tiempo de ejecución: ', str(tiempo_ejecucion))
 
         # Pausa entre cada lectura
-        sleep(30)
+        sleep(300)
 
     # Acciones tras terminar con error
     dbconnection.close_connection()
