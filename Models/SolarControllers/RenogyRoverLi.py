@@ -303,7 +303,8 @@ class RenogyRoverLi(AbstractModel):
 
 
 
-    def __init__ (self, debug=False, port='/dev/ttyUSB0'):
+    def __init__ (self, device_id=1, port='/dev/ttyUSB0', debug=False):
+        self.device_id = device_id
         self.DEBUG = debug
         self.serial = SerialConnection(port=port, debug=debug, baudrate=9600,
                                        method='rtu', timeout=0.5)
@@ -1023,6 +1024,7 @@ class RenogyRoverLi(AbstractModel):
         :return:
         """
         return {
+            'device_id': self.device_id,
             'hardware': self.get_hardware(),
             'version': self.get_version(),
             'serial_number': self.get_serial_number(),
@@ -1092,6 +1094,14 @@ class RenogyRoverLi(AbstractModel):
         tomados desde el exterior.
         """
         return {
+            'device_id': {
+                'type': 'Numeric',
+                'params': {
+                    'precision': 11,
+                    'asdecimal': False,
+                },
+                'others': None,
+            },
             'battery_voltage': {
                 'type': 'Numeric',
                 'params': {

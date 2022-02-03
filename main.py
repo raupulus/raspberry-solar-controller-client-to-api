@@ -83,7 +83,8 @@ dbconnection = DbConnection()
 # apiconnection = Apiconnection()
 
 # Controlador solar
-solar_controller = RenogyRoverLi(debug=DEBUG, port=PORT)
+device_id = int(os.getenv("DEVICE_ID")) or 1
+solar_controller = RenogyRoverLi(device_id, port=PORT, debug=DEBUG)
 
 # Controladores
 #controllers = {}

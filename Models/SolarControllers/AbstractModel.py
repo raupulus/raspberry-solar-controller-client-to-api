@@ -84,6 +84,14 @@ class AbstractModel(ABC):
     }
 
     @property
+    def device_id (self):
+        """
+        El identificador del dispositivo para control solar..
+        :return:
+        """
+        pass
+
+    @property
     def sectionMap (self):
         """
         Devuelve un diccionario con los datos de la sección.
