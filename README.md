@@ -115,3 +115,25 @@ es inconveniente mientras existan permisos adecuados para el usuario.
 mkdir /home/pi/git && cd /home/pi/git
 git clone https://gitlab.com/fryntiz/raspberry-solar-controller-client-to-api.git
 ```
+
+### Asignar tarea cron para ejecutarse automáticamente al iniciar la raspberry.
+
+Podemos hacer que se inicie automáticamente al iniciar nuestra raspberry y
+de esta forma asegurarnos que siempre tomará datos aunque sea reiniciada.
+
+En el crontab se añade la línea hacia el script indicando que lo ejecute nuestro
+usuario.
+
+Adicionalmente guardo toda la salida en un log temporal dentro de **/tmp**,
+esto tiene el inconveniente de que se pierde al reiniciar. Lo mantengo así
+pues solo lo utilizo para depurar la salida y ver errores que pueda ir
+corrigiendo. Puedes utilizar cualquier directorio para mantener permanente el
+log.
+
+Nótese que al crontab le asigno un retardo de 50 segundos para dejar tiempo a
+terminar de cargar el sistema (no era necesario pero así aseguro que se
+ejecuta correctamente ya que inicio bastantes aplicaciones y servicios).
+
+Añadir la siguiente línea a crontab:
+
+@reboot pi sleep 50 && python3 /home/pi/git/raspberry-solar-controller-client-to-api/main.py >> /tmp/log-raspberry-solar-controller-client-to-api.log 2>> /tmp/log-raspberry-solar-controller-client-to-api.log
