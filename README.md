@@ -76,3 +76,42 @@ ya que para ello utilizo SqlAlchemy intentnado abstraer esa parte.
 
 En mi caso tengo varias aplicaciones que utilizan PostgreSQL, por lo que he 
 decido seguir usándolo también para esta aplicación en lugar de instalar otro.
+
+### Crear usuario y base de datos solar_controller
+
+Creo el usuario para postgresql
+
+```bash
+sudo -u postgres createuser pi
+```
+
+Al crear el usuario así, tal vez necesitemos cambiar la contraseña del
+usuario recién creado.
+
+Para ello entramos al intérprete de comandos para postgres con **psql**
+
+```bash
+sudo -u postgres psql
+```
+
+Una vez dentro le pedimos cambiar la contraseña del usuario **pi**:
+
+```postgresql
+\password pi
+```
+
+Creo la base de datos para almacenar las lecturas hasta que sean subidas:
+
+```bash
+sudo -u postgres createdb -O pi -T template1 solar_controller
+```
+
+### Clonar repositorio
+
+Creamos el directorio git y entramos a él, si deseamos otro directorio no
+es inconveniente mientras existan permisos adecuados para el usuario.
+
+```bash
+mkdir /home/pi/git && cd /home/pi/git
+git clone https://gitlab.com/fryntiz/raspberry-solar-controller-client-to-api.git
+```
