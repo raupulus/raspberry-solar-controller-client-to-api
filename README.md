@@ -50,3 +50,29 @@ python3-rpi.gpio python3-pip
 
 De todas formas, tener en cuenta que los nombres y origen de los paquetes pueden
 cambiar. Tal vez en futuras versiones se necesite algunos instalar desde pip.
+
+## Models
+
+Hasta el momento he utilizado esto con mi propio cargador solar por lo que solo
+dispone de este modelo:
+
+- RenogyRoverLi
+
+Si tienes un controlador distinto, tendrías que crear un modelo para ese 
+heredando los métodos de AbstractModel e instanciarlo en main.py reemplazando
+el modelo de RenogyRoverLi.
+
+## Instalación
+
+A continuación describo los pasos para instalar que he ido usando durante el
+desarrollo de la aplicación, será necesario adaptar a vuestra situación cada
+paso.
+
+Para el desarrollo trabajo en el directorio **git** dentro del **home** del
+usuario por defecto: **/home/pi/git/raspberry-solar-controller-client-to-api**
+
+El SGBD que utilizo es Postgresql, si prefieres otro debería funcionar igualmente
+ya que para ello utilizo SqlAlchemy intentnado abstraer esa parte.
+
+En mi caso tengo varias aplicaciones que utilizan PostgreSQL, por lo que he 
+decido seguir usándolo también para esta aplicación en lugar de instalar otro.
