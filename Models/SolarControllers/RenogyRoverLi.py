@@ -194,7 +194,7 @@ class RenogyRoverLi(AbstractModel):
             'address': 0x0113,
             'type': 'int',
         },
-        'today_power_consumition': {
+        'today_power_consumption': {
             'bytes': 2,
             'address': 0x0114,
             'type': 'int',
@@ -433,7 +433,7 @@ class RenogyRoverLi(AbstractModel):
 
     def get_battery_percentage (self):
         """
-        Devuelve el porcentaje de la batería
+        Devuelve el porcentaje de carga para la batería
         0x0100 Battery capacity SOC 2 bytes
         Current battery capacity value 0-100 (%)
         :return:
@@ -546,7 +546,7 @@ class RenogyRoverLi(AbstractModel):
 
     def get_load_power (self):
         """
-        Devuelve la intensidad de la carga actual
+        Devuelve la potencia de la carga actual
         0x0105 Load current 2 bytes
         Street light power (W)
         """
@@ -752,12 +752,12 @@ class RenogyRoverLi(AbstractModel):
 
         return response[0] if response else None
 
-    def get_today_power_consumition (self):
+    def get_today_power_consumption (self):
         """
         Devuelve la potencia consumida en el día actual
         0x0114 Power consumption of the current day (kilowatt hour / 10000)
         """
-        scheme = self.sectionMap['today_power_consumition']
+        scheme = self.sectionMap['today_power_consumption']
 
         if self.DEBUG:
             print('Leyendo potencia de consumición en el día')
@@ -830,7 +830,7 @@ class RenogyRoverLi(AbstractModel):
 
     def get_historical_total_discharging_amp_hours (self):
         """
-        Devuelve la descarga total en Ah que ha sido almacenado en la batería.
+        Devuelve la descarga total en Ah que ha sido descargado en la batería.
         0x011A-0x011B Total discharging amp-hrs of the battery - 4 bytes (Ah)
         """
         scheme = self.sectionMap['historical_total_discharging_amp_hours']
@@ -999,7 +999,7 @@ class RenogyRoverLi(AbstractModel):
             'today_charging_amp_hours': self.get_today_charging_amp_hours(),
             'today_discharging_amp_hours': self.get_today_discharging_amp_hours(),
             'today_power_generation': self.get_today_power_generation(),
-            'today_power_consumition': self.get_today_power_consumition(),
+            'today_power_consumption': self.get_today_power_consumption(),
 
         }
 
@@ -1327,7 +1327,7 @@ class RenogyRoverLi(AbstractModel):
                 },
                 'others': None,
             },
-            'today_power_consumition': {
+            'today_power_consumption': {
                 'type': 'Numeric',
                 'params': {
                     'precision': 11,
