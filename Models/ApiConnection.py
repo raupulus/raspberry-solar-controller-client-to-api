@@ -52,6 +52,8 @@
 import datetime
 
 ## Cargo archivos de configuración desde .env
+import decimal
+
 from dotenv import load_dotenv
 load_dotenv(override=True)
 import os
@@ -71,7 +73,7 @@ sleep = time.sleep
 #######################################
 
 
-class Apiconnection:
+class ApiConnection:
     API_URL = os.getenv("API_URL")
     API_TOKEN = os.getenv("API_TOKEN")
     DEBUG = os.getenv("DEBUG") == "True"
@@ -106,7 +108,7 @@ class Apiconnection:
 
         return session
 
-    def send(self, path, datas_json):
+    def send(self, path, datas_json, method):
         """
         Envía la petición a la API.
         :param path: Directorio dentro de la api (ex: /api/path/endpoint)
@@ -118,28 +120,42 @@ class Apiconnection:
         token = self.API_TOKEN
         full_url = url + path
 
+        """
         data = {
             'data': datas_json,
             'info': 'Enviado desde Raspberry Pi'
         }
+        """
+
+        info = {
+            'iot': 'Raspberry Pi',
+        }
 
         headers = {
             'Content-type': 'application/json',
-            'Accept': 'text/plain',
+            'Accept': 'application/json',
             'Authorization': 'Bearer ' + str(token),
         }
 
+        ## TODO → Check method POST|GET|PUT|DELETE
+
+        ## TODO → Comprobar si no es un array (datas_json), convertirlo en uno.
+
+        ## TODO → Añadir metadatos a la subida (info sobre iot que envía)
+
+        #data.push(info)
         try:
             req = self.requests_retry_session().post(
                 full_url,
-                data=json.dumps(data),
+                #data=json.dumps(datas_json),
+                data=datas_json,
                 headers=headers,
                 timeout=30
             )
 
             if self.DEBUG:
                 print('Respuesta de API: ', req.status_code)
-                #print('Recibido: ', req.text)
+                print('Recibido: ', req.text)
 
             # Guardado correctamente 201, con errores 200, mal 500
             if int(req.status_code) == 201:
@@ -159,7 +175,7 @@ class Apiconnection:
 
             return False
 
-    def parse_to_json(self, rows, columns):
+    def parse_array_to_json(self, rows, columns):
         """
         Convierte los datos recibidos en JSON
         :param rows: Tuplas con todas las entradas desde la DB.
@@ -171,14 +187,14 @@ class Apiconnection:
 
         # Compongo el objeto json que será devuelto.
         for row in rows:
-            tupla = {}
+            tupla = { }
 
             # Por cada tupla creo la pareja de clave: valor
             for iteracion in range(len(columns)):
                 cell = str(row[iteracion])
 
                 if columns[iteracion] != 'id':
-                    tupla.update({columns[iteracion]: cell})
+                    tupla.update({ columns[iteracion]: cell })
 
             result.append(tupla)
 
@@ -190,7 +206,42 @@ class Apiconnection:
             indent=4,
         )
 
-    def upload(self, name, path, datas, columns):
+    def parse_to_json(self, row, columns):
+        """
+        Convierte los datos recibidos en JSON
+        :param rows: Tuplas con todas las entradas desde la DB.
+        :param columns: Nombre de las columnas en orden respecto a tuplas.
+        :return: Devuelve el objeto json
+        """
+
+        result = {}
+
+        # Compongo el objeto json que será devuelto.
+        for iteracion in range(len(columns)):
+            cell = row[iteracion]
+            #print('cell: ', cell)
+
+            if isinstance(cell, decimal.Decimal):
+                cell = float(cell)
+
+            if isinstance(cell, datetime.datetime):
+                cell = cell.strftime("%Y-%m-%d %H:%M:%S")
+
+            if columns[iteracion] != 'id':
+                result.update({ columns[iteracion]: cell })
+
+        return json.dumps(
+            result,
+            #default=None,
+            #ensure_ascii=False,
+            #sort_keys=True,
+            #indent=4,
+            skipkeys=False, ensure_ascii=True, check_circular=True,
+            allow_nan=True, cls=None, indent=None, separators=None,
+            default=None
+        )
+
+    def upload(self, name, path, datas, columns, method='GET'):
         """
         Recibe la ruta dentro de la API y los datos a enviar para procesar la
         subida atacando la API.
@@ -201,8 +252,10 @@ class Apiconnection:
             if self.DEBUG:
                 print('Subiendo dato: ' + name + ', ruta de api: ' + path)
 
-            datas_json = self.parse_to_json(datas, columns)
-            #print('Datos formateados en JSON:', datas_json)
-            result_send = self.send(path, datas_json)
+            for data in datas:
+                #print(data)
+                datas_json = self.parse_to_json(data, columns)
+                #print('Datos formateados en JSON:', datas_json)
+                result_send = self.send(path, datas_json, method=method)
 
-            return result_send
+            #return result_send

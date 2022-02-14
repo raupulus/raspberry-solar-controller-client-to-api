@@ -54,7 +54,7 @@
 # #       Importar Librerías        # #
 #######################################
 from Models.SolarControllers.RenogyRoverLi import RenogyRoverLi
-# from Models.ApiConnection import ApiConnection
+from Models.ApiConnection import ApiConnection
 from Models.DbConnection import DbConnection
 from dotenv import load_dotenv
 import os
@@ -76,15 +76,18 @@ DEBUG = os.getenv("DEBUG") == "True"
 # Puerto de la interfaz serial
 PORT = os.getenv("PORT")
 
+# Indica si procesa subidas a la api
+UPLOAD_API = os.getenv("UPLOAD_API") == "True"
+
 # Abro conexión con la base de datos instanciando el modelo que la representa.
 dbconnection = DbConnection()
 
 # Parámetros para acceder a la API.
-# apiconnection = Apiconnection()
+apiconnection = ApiConnection()
 
 # Controlador solar
-device_id = int(os.getenv("DEVICE_ID")) or 1
-solar_controller = RenogyRoverLi(device_id, port=PORT, debug=DEBUG)
+device_id = int(os.getenv("DEVICE_ID")) or 0
+solar_controller = RenogyRoverLi(device_id=device_id, port=PORT, debug=DEBUG)
 
 # Controladores
 #controllers = {}
@@ -92,6 +95,40 @@ solar_controller = RenogyRoverLi(device_id, port=PORT, debug=DEBUG)
 #######################################
 # #            FUNCIONES            # #
 #######################################
+
+
+def upload_data_to_api(apiconnection, dbconnection):
+    """
+    Obtiene los datos para de la DB y los envía a la API
+    :param apiconnection:
+    :param dbconnection:
+    """
+
+    # Parámetros/tuplas desde la base de datos.
+    params_from_db = dbconnection.table_get_data_last(
+        solar_controller.tablename, 30)
+
+    # Columnas del modelo.
+    columns = dbconnection.tables[solar_controller.tablename].columns.keys()
+
+    try:
+        response = apiconnection.upload(
+            solar_controller.tablename,
+            '/hardware/v1/solarcharge/store',
+            params_from_db,
+            columns,
+            method='POST'
+        )
+
+        # Limpio los datos de la tabla si se ha subido correctamente.
+        if response:
+            if DEBUG:
+                print('Eliminando de la DB las tuplas subidas a la API')
+
+            #dbconnection.table_drop_last_elements(solar_controller.tablename, 20)
+    except():
+        if DEBUG:
+            print('Error al subir a la api')
 
 
 def loop ():
@@ -146,8 +183,8 @@ def loop ():
             n_lecturas = 0
 
             try:
-                pass
-                # upload_data_to_api(apiconnection, dbconnection)
+                if UPLOAD_API:
+                    upload_data_to_api(apiconnection, dbconnection)
             except():
                 if DEBUG:
                     print('Error al subir datos a la api')

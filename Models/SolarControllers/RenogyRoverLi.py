@@ -66,6 +66,7 @@ sleep = time.sleep
 
 
 class RenogyRoverLi(AbstractModel):
+
     tablename = 'renogy_rover_li'
 
     sectionMap = {
@@ -256,7 +257,7 @@ class RenogyRoverLi(AbstractModel):
         },
         'battery_type': {
             'bytes': 2,
-            'address': 0xE002,
+            'address': 0xE004,
             'type': 'int',
         },
     }
@@ -301,9 +302,7 @@ class RenogyRoverLi(AbstractModel):
     Registro: 286, Valor: [0, 22609, 32768, 0]
     """
 
-
-
-    def __init__ (self, device_id=1, port='/dev/ttyUSB0', debug=False):
+    def __init__ (self, device_id=0, port='/dev/ttyUSB0', debug=False):
         self.device_id = device_id
         self.DEBUG = debug
         self.serial = SerialConnection(port=port, debug=debug, baudrate=9600,
@@ -953,7 +952,7 @@ class RenogyRoverLi(AbstractModel):
         charging_status = self.get_charging_status()
 
         return self.CHARGING_STATE.get(
-            self.get_charging_status()) if charging_status else None
+            self.get_charging_status()) if charging_status else self.CHARGING_STATE.get(0)
 
     def get_nominal_battery_capacity (self):
         """
@@ -983,6 +982,7 @@ class RenogyRoverLi(AbstractModel):
         response = self.serial.read_register(scheme['address'], scheme['bytes'],
                                              scheme['type'])
 
+        print('get_battery_type response: ', response)
         return self.BATTERY_TYPE.get(response[0]) if response else None
 
     def get_today_historical_info_datas (self):
@@ -1095,10 +1095,9 @@ class RenogyRoverLi(AbstractModel):
         """
         return {
             'device_id': {
-                'type': 'Numeric',
+                'type': 'Integer',
                 'params': {
                     'precision': 11,
-                    'asdecimal': False,
                 },
                 'others': None,
             },
@@ -1121,10 +1120,9 @@ class RenogyRoverLi(AbstractModel):
                 'others': None,
             },
             'battery_percentage': {
-                'type': 'Numeric',
+                'type': 'Integer',
                 'params': {
                     'precision': 11,
-                    'asdecimal': False,
                 },
                 'others': None,
             },
@@ -1156,10 +1154,9 @@ class RenogyRoverLi(AbstractModel):
                 'others': None,
             },
             'load_power': {
-                'type': 'Numeric',
+                'type': 'Integer',
                 'params': {
                     'precision': 11,
-                    'asdecimal': False,
                 },
                 'others': None,
             },
@@ -1182,34 +1179,30 @@ class RenogyRoverLi(AbstractModel):
                 'others': None,
             },
             'solar_power': {
-                'type': 'Numeric',
+                'type': 'Integer',
                 'params': {
                     'precision': 11,
-                    'asdecimal': False,
                 },
                 'others': None,
             },
             'street_light_status': {
-                'type': 'Numeric',
+                'type': 'Integer',
                 'params': {
                     'precision': 11,
-                    'asdecimal': False,
                 },
                 'others': None,
             },
             'street_light_brightness': {
-                'type': 'Numeric',
+                'type': 'Integer',
                 'params': {
                     'precision': 11,
-                    'asdecimal': False,
                 },
                 'others': None,
             },
             'charging_status': {
-                'type': 'Numeric',
+                'type': 'Integer',
                 'params': {
                     'precision': 11,
-                    'asdecimal': False,
                 },
                 'others': None,
             },
@@ -1258,10 +1251,9 @@ class RenogyRoverLi(AbstractModel):
                 'others': None,
             },
             'nominal_battery_capacity': {
-                'type': 'Numeric',
+                'type': 'Integer',
                 'params': {
                     'precision': 11,
-                    'asdecimal': False,
                 },
                 'others': None,
             },
@@ -1294,10 +1286,9 @@ class RenogyRoverLi(AbstractModel):
                 'others': None,
             },
             'today_max_charging_power': {
-                'type': 'Numeric',
+                'type': 'Integer',
                 'params': {
                     'precision': 11,
-                    'asdecimal': False,
                 },
                 'others': None,
             },
@@ -1320,18 +1311,16 @@ class RenogyRoverLi(AbstractModel):
                 'others': None,
             },
             'today_power_generation': {
-                'type': 'Numeric',
+                'type': 'Integer',
                 'params': {
                     'precision': 11,
-                    'asdecimal': False,
                 },
                 'others': None,
             },
             'today_power_consumption': {
-                'type': 'Numeric',
+                'type': 'Integer',
                 'params': {
                     'precision': 11,
-                    'asdecimal': False,
                 },
                 'others': None,
             },
