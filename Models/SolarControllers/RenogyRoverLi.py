@@ -825,7 +825,9 @@ class RenogyRoverLi(AbstractModel):
         response = self.serial.read_register(scheme['address'], scheme['bytes'],
                                              scheme['type'])
 
-        return response[0] if response else None
+        #print('historical_total_charging_amp_hours', response)
+
+        return response[1] if response else None
 
     def get_historical_total_discharging_amp_hours (self):
         """
@@ -840,7 +842,9 @@ class RenogyRoverLi(AbstractModel):
         response = self.serial.read_register(scheme['address'], scheme['bytes'],
                                              scheme['type'])
 
-        return response[0] if response else None
+        #print('historical_total_discharging_amp_hours', response)
+
+        return response[1] if response else None
 
     def get_historical_cumulative_power_generation (self):
         """
@@ -856,12 +860,14 @@ class RenogyRoverLi(AbstractModel):
         TOFIX
         """
 
-        return None
+        #return None
 
         response = self.serial.read_register(scheme['address'], scheme['bytes'],
                                              scheme['type'])
 
-        return response[0] if response else None
+        #print('historical_cumulative_power_generation', response)
+
+        return response[1] if response else None
 
     def get_historical_cumulative_power_consumption (self):
         """
@@ -877,12 +883,14 @@ class RenogyRoverLi(AbstractModel):
         TOFIX
         """
 
-        return None
+        #return None
 
         response = self.serial.read_register(scheme['address'], scheme['bytes'],
                                              scheme['type'])
 
-        return response[0] if response else None
+        #print('historical_cumulative_power_consumption', response)
+
+        return response[1] if response else None
 
     def get_street_light_status (self):
         """
@@ -902,6 +910,8 @@ class RenogyRoverLi(AbstractModel):
 
         response = self.serial.read_register(scheme['address'], scheme['bytes'],
                                              scheme['type'])
+
+        print('street_light_status', response)
 
         return bool(response[0]) if response else None
 
@@ -923,6 +933,8 @@ class RenogyRoverLi(AbstractModel):
 
         response = self.serial.read_register(scheme['address'], scheme['bytes'],
                                              scheme['type'])
+
+        print('street_light_brightness', response)
 
         return response[0] if response else None
 
@@ -982,7 +994,6 @@ class RenogyRoverLi(AbstractModel):
         response = self.serial.read_register(scheme['address'], scheme['bytes'],
                                              scheme['type'])
 
-        print('get_battery_type response: ', response)
         return self.BATTERY_TYPE.get(response[0]) if response else None
 
     def get_today_historical_info_datas (self):
