@@ -238,7 +238,7 @@ class RenogyRoverLi(AbstractModel):
         'street_light_status': {
             'bytes': 2,
             'address': 0x0120,
-            'type': 'int',
+            'type': 'bool',
         },
         'street_light_brightness': {
             'bytes': 2,
@@ -277,29 +277,34 @@ class RenogyRoverLi(AbstractModel):
     
     Leyendo brillo de la luz en la calle
     Registro: 288, Valor: [32768, 0]
-    """
+    
+    
+    
+    
+    #Medidas a las 15:00
+    street_light_brightness response: [32773, 0]
+    street_light_brightness response hexadecimal: 0x8005
+    street_light_brightness response hexadecimal1: 0x0
+    street_light_brightness 0xe400: 32768
+    street_light_brightness 0x00E4: 4
+    street_light_brightness 0x0064: 4
+    street_light_brightness 0x0000: 0
+    street_light_brightness 0x00FF: 5
+    street_light_brightness 0x0044: 4
+    street_light_brightness 0x0088: 0
+    street_light_brightness 0x0004: 4
+    street_light_brightness b: 0b1000000000000101
+    street_light_brightness b2-3: 10
+    street_light_brightness b2-3: 1000000
+    street_light_brightness has_brightness_binary: 0b10
+    street_light_brightness has_brightness: True
+    street_light_brightness brightness_raw_binary: 0b1000000
+    street_light_brightness brightness_raw: 64
+    street_light_brightness brightness %: 100
 
-    """
-    TOFIX:
+
     
-    Hay que hacer corregir para obtener correctamente los datos.
     
-    'historical_total_charging_amp_hours': 0, 
-    'historical_total_discharging_amp_hours': 0, 
-    'historical_cumulative_power_generation': 0, 
-    'historical_cumulative_power_consumption': 0
-    
-    Leyendo carga total en Ah
-    Registro: 280, Valor: [0, 1931, 0, 1768]
-    
-    Leyendo descarga total en Ah
-    Registro: 282, Valor: [0, 1768, 0, 25879]
-    
-    Devuelve la potencia generada acumulada en el tiempo.
-    Registro: 284, Valor: [0, 25879, 0, 22609]
-    
-    Devuelve la potencia consumida acumulada en el tiempo.
-    Registro: 286, Valor: [0, 22609, 32768, 0]
     """
 
     def __init__ (self, device_id=0, port='/dev/ttyUSB0', debug=False):
@@ -906,12 +911,22 @@ class RenogyRoverLi(AbstractModel):
         TOFIX
         """
 
-        return None
+        #return None
 
         response = self.serial.read_register(scheme['address'], scheme['bytes'],
                                              scheme['type'])
 
         print('street_light_status', response)
+
+
+
+        """
+        EN PRUEBAS!!!!!!!!!!!!
+        """
+
+        has_brightness_binary = "0b" + bin(response[0])[2:4]
+        return bool(int(has_brightness_binary, 2))
+
 
         return bool(response[0]) if response else None
 
@@ -929,12 +944,40 @@ class RenogyRoverLi(AbstractModel):
         TOFIX
         """
 
-        return None
+        #return None
 
         response = self.serial.read_register(scheme['address'], scheme['bytes'],
                                              scheme['type'])
 
-        print('street_light_brightness', response)
+        print('street_light_brightness response:', response)
+        print('street_light_brightness response hexadecimal:', hex(response[0]))
+        print('street_light_brightness response hexadecimal1:', hex(response[1]))
+        print('street_light_brightness 0xe400:', response[0] & 0xe400)
+        print('street_light_brightness 0x00E4:', response[0] & 0x00E4)
+        print('street_light_brightness 0x0064:', response[0] & 0x0064)
+        print('street_light_brightness 0x0000:', response[0] & 0x0000)
+        print('street_light_brightness 0x00FF:', response[0] & 0x00FF)
+        print('street_light_brightness 0x0044:', response[0] & 0x0044)
+        print('street_light_brightness 0x0088:', response[0] & 0x0088)
+        print('street_light_brightness 0x0004:', response[0] & 0x0004)
+        print('street_light_brightness b:', bin(response[0]))
+        print('street_light_brightness b2-3:', bin(response[0])[2:4])
+        print('street_light_brightness b2-3:', bin(response[0])[2:9])
+
+        has_brightness_binary = "0b" + bin(response[0])[2:4]
+        has_brightness = bool(int(has_brightness_binary, 2))
+        brightness_raw_binary = "0b" + bin(response[0])[2:9]
+        brightness_raw = int(brightness_raw_binary, 2)
+
+        brightness = int((100 / 64) * brightness_raw)
+
+        print('street_light_brightness has_brightness_binary:', has_brightness_binary)
+        print('street_light_brightness has_brightness:', has_brightness)
+        print('street_light_brightness brightness_raw_binary:', brightness_raw_binary)
+        print('street_light_brightness brightness_raw:', brightness_raw)
+        print('street_light_brightness brightness %:', brightness)
+
+        return brightness if brightness else 0
 
         return response[0] if response else None
 
@@ -1197,7 +1240,7 @@ class RenogyRoverLi(AbstractModel):
                 'others': None,
             },
             'street_light_status': {
-                'type': 'Integer',
+                'type': 'Boolean',
                 'params': {
                     'precision': 11,
                 },
@@ -1288,6 +1331,15 @@ class RenogyRoverLi(AbstractModel):
                 'others': None,
             },
             'today_max_charging_current': {
+                'type': 'Numeric',
+                'params': {
+                    'precision': 11,
+                    'asdecimal': True,
+                    'scale': 2
+                },
+                'others': None,
+            },
+            'today_max_discharging_current': {
                 'type': 'Numeric',
                 'params': {
                     'precision': 11,

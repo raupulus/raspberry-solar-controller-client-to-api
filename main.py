@@ -106,7 +106,7 @@ def upload_data_to_api(apiconnection, dbconnection):
 
     # Parámetros/tuplas desde la base de datos.
     params_from_db = dbconnection.table_get_data_last(
-        solar_controller.tablename, 30)
+        solar_controller.tablename, 1)
 
     # Columnas del modelo.
     columns = dbconnection.tables[solar_controller.tablename].columns.keys()
