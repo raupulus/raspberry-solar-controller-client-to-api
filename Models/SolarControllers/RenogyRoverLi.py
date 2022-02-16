@@ -874,7 +874,16 @@ class RenogyRoverLi(AbstractModel):
         # Obtengo el valor en proporción a la luz de calle
         voltage = self.get_solar_voltage()
 
-        return 100 if voltage >= 40 else int((100/40) * voltage)
+        ## OJO → Cálculo preparado para dos placas en serie 24v (hasta 40v aprox)
+        if voltage >= 40:
+            porcent = 100
+        elif voltage < 15:
+            porcent = 0
+        else:
+            porcent = (100 / (40 - 15)) / voltage
+
+
+        return int(porcent)
 
     def get_charging_status (self):
         """
