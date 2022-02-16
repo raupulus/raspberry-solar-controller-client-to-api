@@ -66,7 +66,6 @@ sleep = time.sleep
 
 
 class RenogyRoverLi(AbstractModel):
-
     tablename = 'renogy_rover_li'
 
     sectionMap = {
@@ -261,51 +260,6 @@ class RenogyRoverLi(AbstractModel):
             'type': 'int',
         },
     }
-
-
-    """
-    TOFIX:
-    
-    Hay que hacer corregir para obtener correctamente los datos.
-
-    
-    'street_light_status': True, 
-    'street_light_brightness'32768
-    
-    Leyendo estado de la luz en la calle
-    Registro: 288, Valor: [32768, 0]
-    
-    Leyendo brillo de la luz en la calle
-    Registro: 288, Valor: [32768, 0]
-    
-    
-    
-    
-    #Medidas a las 15:00
-    street_light_brightness response: [32773, 0]
-    street_light_brightness response hexadecimal: 0x8005
-    street_light_brightness response hexadecimal1: 0x0
-    street_light_brightness 0xe400: 32768
-    street_light_brightness 0x00E4: 4
-    street_light_brightness 0x0064: 4
-    street_light_brightness 0x0000: 0
-    street_light_brightness 0x00FF: 5
-    street_light_brightness 0x0044: 4
-    street_light_brightness 0x0088: 0
-    street_light_brightness 0x0004: 4
-    street_light_brightness b: 0b1000000000000101
-    street_light_brightness b2-3: 10
-    street_light_brightness b2-3: 1000000
-    street_light_brightness has_brightness_binary: 0b10
-    street_light_brightness has_brightness: True
-    street_light_brightness brightness_raw_binary: 0b1000000
-    street_light_brightness brightness_raw: 64
-    street_light_brightness brightness %: 100
-
-
-    
-    
-    """
 
     def __init__ (self, device_id=0, port='/dev/ttyUSB0', debug=False):
         self.device_id = device_id
@@ -861,16 +815,8 @@ class RenogyRoverLi(AbstractModel):
         if self.DEBUG:
             print('Devuelve la potencia generada acumulada en el tiempo.')
 
-        """
-        TOFIX
-        """
-
-        #return None
-
         response = self.serial.read_register(scheme['address'], scheme['bytes'],
                                              scheme['type'])
-
-        #print('historical_cumulative_power_generation', response)
 
         return response[1] if response else None
 
@@ -884,16 +830,8 @@ class RenogyRoverLi(AbstractModel):
         if self.DEBUG:
             print('Devuelve la potencia consumida acumulada en el tiempo.')
 
-        """
-        TOFIX
-        """
-
-        #return None
-
         response = self.serial.read_register(scheme['address'], scheme['bytes'],
                                              scheme['type'])
-
-        #print('historical_cumulative_power_consumption', response)
 
         return response[1] if response else None
 
@@ -907,79 +845,36 @@ class RenogyRoverLi(AbstractModel):
         if self.DEBUG:
             print('Leyendo estado de la luz en la calle')
 
-        """
-        TOFIX
-        """
-
-        #return None
-
-        response = self.serial.read_register(scheme['address'], scheme['bytes'],
-                                             scheme['type'])
-
-        print('street_light_status', response)
-
-
-
-        """
-        EN PRUEBAS!!!!!!!!!!!!
-        """
-
-        has_brightness_binary = "0b" + bin(response[0])[2:4]
-        return bool(int(has_brightness_binary, 2))
-
-
-        return bool(response[0]) if response else None
+        # Como me daba problemas obtener este dato, lo saco del voltaje solar.
+        return bool(self.get_street_light_brightness() > 15)
 
     def get_street_light_brightness (self):
         """
         Devuelve el brillo de la luz de calle.
         0x0120 Street light brightness - 2 byte (0-6, 0-100%)
         """
-        scheme = self.sectionMap['street_light_brightness']
+        #scheme = self.sectionMap['street_light_brightness']
 
         if self.DEBUG:
             print('Leyendo brillo de la luz en la calle')
 
         """
-        TOFIX
-        """
-
-        #return None
-
+        Esto es una prueba, no conseguía obtener la luz real
         response = self.serial.read_register(scheme['address'], scheme['bytes'],
                                              scheme['type'])
 
         print('street_light_brightness response:', response)
         print('street_light_brightness response hexadecimal:', hex(response[0]))
-        print('street_light_brightness response hexadecimal1:', hex(response[1]))
-        print('street_light_brightness 0xe400:', response[0] & 0xe400)
-        print('street_light_brightness 0x00E4:', response[0] & 0x00E4)
-        print('street_light_brightness 0x0064:', response[0] & 0x0064)
-        print('street_light_brightness 0x0000:', response[0] & 0x0000)
         print('street_light_brightness 0x00FF:', response[0] & 0x00FF)
-        print('street_light_brightness 0x0044:', response[0] & 0x0044)
-        print('street_light_brightness 0x0088:', response[0] & 0x0088)
-        print('street_light_brightness 0x0004:', response[0] & 0x0004)
         print('street_light_brightness b:', bin(response[0]))
-        print('street_light_brightness b2-3:', bin(response[0])[2:4])
-        print('street_light_brightness b2-3:', bin(response[0])[2:9])
-
-        has_brightness_binary = "0b" + bin(response[0])[2:4]
-        has_brightness = bool(int(has_brightness_binary, 2))
-        brightness_raw_binary = "0b" + bin(response[0])[2:9]
-        brightness_raw = int(brightness_raw_binary, 2)
-
-        brightness = int((100 / 64) * brightness_raw)
-
-        print('street_light_brightness has_brightness_binary:', has_brightness_binary)
-        print('street_light_brightness has_brightness:', has_brightness)
-        print('street_light_brightness brightness_raw_binary:', brightness_raw_binary)
-        print('street_light_brightness brightness_raw:', brightness_raw)
-        print('street_light_brightness brightness %:', brightness)
-
-        return brightness if brightness else 0
-
+      
         return response[0] if response else None
+        """
+
+        # Obtengo el valor en proporción a la luz de calle
+        voltage = self.get_solar_voltage()
+
+        return 100 if voltage >= 40 else int((100/40) * voltage)
 
     def get_charging_status (self):
         """

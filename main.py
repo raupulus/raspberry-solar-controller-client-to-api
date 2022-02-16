@@ -144,7 +144,7 @@ def loop ():
         n_lecturas = n_lecturas + 1
 
         if DEBUG:
-            print('Lecturas de sensores desde la última subida: ' + str(
+            print('Lecturas desde la última subida: ' + str(
                 n_lecturas))
 
         # Guardo el momento que inicia lectura.
@@ -203,7 +203,7 @@ def loop ():
             print('Tiempo de ejecución: ', str(tiempo_ejecucion))
 
         # Pausa entre cada lectura
-        sleep(300)
+        sleep(60)
 
     # Acciones tras terminar con error
     dbconnection.close_connection()
