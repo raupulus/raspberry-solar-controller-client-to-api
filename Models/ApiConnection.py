@@ -252,10 +252,16 @@ class ApiConnection:
             if self.DEBUG:
                 print('Subiendo dato: ' + name + ', ruta de api: ' + path)
 
+            result_send = False
+
             for data in datas:
                 #print(data)
                 datas_json = self.parse_to_json(data, columns)
                 #print('Datos formateados en JSON:', datas_json)
-                result_send = self.send(path, datas_json, method=method)
 
-            #return result_send
+                if (self.send(path, datas_json, method=method)):
+                    result_send = True
+
+
+            return result_send
+
