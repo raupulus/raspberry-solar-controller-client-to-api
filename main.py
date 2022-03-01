@@ -106,7 +106,7 @@ def upload_data_to_api(apiconnection, dbconnection):
 
     # Parámetros/tuplas desde la base de datos.
     params_from_db = dbconnection.table_get_data_last(
-        solar_controller.tablename, 1)
+        solar_controller.tablename, 20)
 
     # Columnas del modelo.
     columns = dbconnection.tables[solar_controller.tablename].columns.keys()
@@ -125,7 +125,7 @@ def upload_data_to_api(apiconnection, dbconnection):
             if DEBUG:
                 print('Eliminando de la DB las tuplas subidas a la API')
 
-            #dbconnection.table_drop_last_elements(solar_controller.tablename, 20)
+            dbconnection.table_drop_last_elements(solar_controller.tablename, 20)
     except():
         if DEBUG:
             print('Error al subir a la api')
