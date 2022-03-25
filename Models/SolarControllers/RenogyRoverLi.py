@@ -840,13 +840,13 @@ class RenogyRoverLi(AbstractModel):
         Devuelve el estado de la luz de calle.
         0x0120 Street light status - 2 byte (bool)
         """
-        scheme = self.sectionMap['street_light_status']
+        # scheme = self.sectionMap['street_light_status']
 
         if self.DEBUG:
             print('Leyendo estado de la luz en la calle')
 
         # Como me daba problemas obtener este dato, lo saco del voltaje solar.
-        return bool(self.get_street_light_brightness() > 15)
+        return bool(self.get_street_light_brightness() > 12.3)
 
     def get_street_light_brightness (self):
         """
@@ -874,14 +874,16 @@ class RenogyRoverLi(AbstractModel):
         # Obtengo el valor en proporción a la luz de calle
         voltage = self.get_solar_voltage()
 
+        min_light_voltage = 12.3
+        max_light_voltage = 41.5
+
         ## OJO → Cálculo preparado para dos placas en serie 24v (hasta 40v aprox)
-        if voltage >= 40:
+        if voltage >= max_light_voltage:
             porcent = 100
-        elif voltage < 15:
+        elif voltage < min_light_voltage:
             porcent = 0
         else:
-            porcent = (100 / (40 - 15)) / voltage
-
+            porcent = (100 / (max_light_voltage - min_light_voltage)) * (voltage - min_light_voltage)
 
         return int(porcent)
 
