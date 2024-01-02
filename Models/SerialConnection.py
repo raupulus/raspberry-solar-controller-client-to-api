@@ -47,7 +47,7 @@
 #######################################
 # #       Importar Librerías        # #
 #######################################
-from pymodbus.client.sync import ModbusSerialClient as ModbusClient
+from pymodbus.client import ModbusSerialClient as ModbusClient
 
 
 # result = client.read_holding_registers(0x0107,1,unit=1)

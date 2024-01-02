@@ -846,7 +846,7 @@ class RenogyRoverLi(AbstractModel):
             print('Leyendo estado de la luz en la calle')
 
         # Como me daba problemas obtener este dato, lo saco del voltaje solar.
-        return bool(self.get_street_light_brightness() > 12.3)
+        return bool(self.get_street_light_brightness() > 12.3) if self.get_street_light_brightness() else False
 
     def get_street_light_brightness (self):
         """

@@ -17,20 +17,19 @@ obtener los datos.
 
 Estos son los elementos
 - Raspberry pi 4 (2 GB RAM)
-- Puerto Serial USB UART TTL (3,3V)
+- Puerto Serial USB UART TTL (3,3V o 5v según conversor)
 - Conversor RS232 a UART TTL (MAX23232)
 - Cable RJ11
 
 ## Software
 
-- Raspbian (Debian 11)
-- Python 3.9
+- Raspbian (Debian 12)
+- Python 3.10
 - Postgresql
 
 ## Módulos python
 
 - python3-serial 
-- python3-pyserial
 - python3-requests
 - python3-sql
 - python3-postgresql
@@ -39,13 +38,14 @@ Estos son los elementos
 - python3-smbus
 - python3-rpi.gpio
 - python3-pip
+- python3-psycopg2
 
 Para instalarlos todos en raspbian sería esta línea:
 
 ```bash
-sudo apt install python3-dotenv python3-serial python3-pyserial python3-requests \
+sudo apt install python3-dotenv python3-serial python3-requests \
 python3-sql python3-postgresql python3-sqlalchemy python3-dotenv python3-smbus \
-python3-rpi.gpio python3-pip
+python3-rpi.gpio python3-pip python3-psycopg2
 ```
 
 De todas formas, tener en cuenta que los nombres y origen de los paquetes pueden
@@ -113,7 +113,7 @@ es inconveniente mientras existan permisos adecuados para el usuario.
 
 ```bash
 mkdir /home/pi/git && cd /home/pi/git
-git clone https://gitlab.com/fryntiz/raspberry-solar-controller-client-to-api.git
+git clone https://gitlab.com/raupulus/raspberry-solar-controller-client-to-api.git
 ```
 
 ### Asignar tarea cron para ejecutarse automáticamente al iniciar la raspberry.
