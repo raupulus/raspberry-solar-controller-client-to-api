@@ -51,6 +51,14 @@ python3-rpi.gpio python3-pip python3-psycopg2
 De todas formas, tener en cuenta que los nombres y origen de los paquetes pueden
 cambiar. Tal vez en futuras versiones se necesite algunos instalar desde pip.
 
+En la versión actual, recomiendo instalar **pymodbus** desde pip en la 
+versión "2.1.0" ya que al actualizar hay algunos problemas que aún no he
+solucionado (En lista de correcciones futuras creando virtualenv)
+
+```bash
+sudo pip install pymodbus==2.1.0 --break-system-packages
+```
+
 ## Models
 
 Hasta el momento he utilizado esto con mi propio cargador solar por lo que solo

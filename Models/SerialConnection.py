@@ -47,8 +47,13 @@
 #######################################
 # #       Importar Librerías        # #
 #######################################
-from pymodbus.client import ModbusSerialClient as ModbusClient
+#from pymodbus.client import ModbusSerialClient as ModbusClient ## pymodbus 3.1
+from pymodbus.client.sync import ModbusSerialClient as ModbusClient ## pymodbus 2.1.0
+from pymodbus.constants import Defaults
 
+Defaults.RetryOnEmpty = True
+Defaults.Timeout = 3
+Defaults.Retries = 5
 
 # result = client.read_holding_registers(0x0107,1,unit=1)
 
@@ -63,7 +68,10 @@ class SerialConnection:
     def __init__ (self, debug=True, port='/dev/ttyUSB0', baudrate=9600,
                   timeout=0.5, method='rtu'):
 
-        self.client = ModbusClient(method=method, port=port,
+        self.client = ModbusClient(method=method, port=port, stopbits=1,
+                                   bytesize=8, parity='N',
+                                   debug=debug,
+                                   auto_open=True,
                                    baudrate=baudrate, timeout=timeout)
 
         self.DEBUG = debug
@@ -98,7 +106,7 @@ class SerialConnection:
             msg = "Registro: {}, Valor: {}".format(register, response.registers)
             print(msg)
 
-        value = response.registers if response.registers else None
+        value = response.registers if not response.isError() and response.registers else None
 
         if self.DEBUG:
             print(type(value))
