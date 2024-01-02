@@ -51,7 +51,7 @@
 
 import datetime
 from sqlalchemy import create_engine, Table, Column, Integer, String, \
-    MetaData, DateTime, Numeric, select, text
+    MetaData, DateTime, Numeric, select, text, Boolean
 
 from sqlalchemy.orm import sessionmaker
 
@@ -113,6 +113,8 @@ class DbConnection:
                 type_column = Integer
             elif data_type == 'String':
                 type_column = String(**data_params)
+            elif data_type == 'Boolean':
+                type_column = Boolean
 
             if datas['others']:
                 columns.append(Column(name, type_column, **other_data))
